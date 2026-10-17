@@ -88,7 +88,7 @@ export default async function Home() {
       </header>
 
       <section className="px-5 md:px-10 pt-10 pb-8 max-w-6xl mx-auto">
-        <p className="font-mono text-xs text-mint tracking-widest uppercase rise">{greet} · <span className="capitalize">{dateLabel}</span></p>
+        <p className="font-mono text-xs text-mint tracking-widest uppercase rise">{greet} · {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}</p>
         <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight mt-3 rise" style={{ animationDelay: ".05s" }}>Seu dia na VINCIT.</h1>
       </section>
 
