@@ -39,16 +39,17 @@ const WEAK = /^\s*(oi|olá|ola|fala|e a[ií]|bom dia|boa (tarde|noite)|gente|pes
 function scoreHook(h: string) {
   const t = h.trim(); if (!t) return null;
   const words = t.split(/\s+/).filter(Boolean).length;
+  const formulas = FORMULAS.filter((f) => f.re?.test(t));
+  const gapF = ["contradicao", "mito", "opiniao", "segredo", "misterio", "custo", "erro", "pare", "alerta", "o-que-aconteceu", "pergunta-dor"];
   const checks: [string, boolean, number][] = [
     ["Até 12 palavras", words <= 12, 20],
     ["Não começa com cumprimento ou 'nesse vídeo'", !WEAK.test(t), 20],
     ["Fala com o espectador (você/seu)", /\b(você|voce|vc|seu|sua|seus|suas|te)\b/i.test(t), 10],
     ["Tem algo específico (número, valor, nome)", /\d|R\$|[A-Z][a-zà-ú]+\s[A-Z]/.test(t.slice(1)), 15],
-    ["Abre uma lacuna (curiosidade, tensão ou contraste)", /\?|\b(mas|porém|ninguém|nunca|erro|segredo|pare|verdade|mito|por que|o que|até o final|cuidado|custou)\b/i.test(t), 20],
+    ["Abre uma lacuna (curiosidade, tensão ou contraste)", /\?|\b(mas|porém|ninguém|nunca|erro|segredo|pare|verdade|mito|por que|o que|até o final|cuidado|custou)\b/i.test(t) || formulas.some((f) => gapF.includes(f.id)), 20],
     ["Linguagem simples (palavras curtas)", t.replace(/[^\p{L}\s]/gu, "").split(/\s+/).filter((w) => w.length > 12).length === 0, 15],
   ];
   const score = checks.reduce((a, [, ok, w]) => a + (ok ? w : 0), 0);
-  const formulas = FORMULAS.filter((f) => f.re?.test(t));
   return { score, words, checks, formulas };
 }
 
