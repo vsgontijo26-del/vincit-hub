@@ -1,4 +1,4 @@
-import { VINCIT } from "./formats-vincit";
+import { VINCIT, HANNAH_PATCH } from "./formats-vincit";
 
 /**
  * Biblioteca de formatos criativos — estudo baseado no "Desafio Formato Criativo 32 dias" (Hannah Franklin).
@@ -18,7 +18,17 @@ export const CATS: Record<Cat, { l: string; d: string; c: string }> = {
 export const DECKS = { hannah: "Desafio Hannah Franklin (32 cartas)", vincit: "Biblioteca VINCIT" } as const;
 export type Deck = keyof typeof DECKS;
 
-export type Format = { n: number; id: string; name: string; cat: Cat; deck: Deck; week?: number; source?: string; essence: string; why: string; how: string[]; combo?: number[] };
+export type Midia = "curto" | "longo" | "carrossel";
+export const MIDIAS: Record<Midia, { l: string; d: string }> = {
+  curto: { l: "Vídeo curto", d: "Reels, Stories, TikTok, Shorts" },
+  longo: { l: "Vídeo longo", d: "YouTube" },
+  carrossel: { l: "Carrossel / arte", d: "Carrossel, post estático, arte" },
+};
+/** formato de entrega (selects) → mídia da biblioteca */
+export const FORMAT_MIDIA: Record<string, Midia> = { Reels: "curto", Stories: "curto", "YouTube": "longo", Carrossel: "carrossel", Foto: "carrossel" };
+export const DELIVERY_FORMATS = ["Reels", "YouTube", "Carrossel", "Stories", "Foto"];
+
+export type Format = { n: number; id: string; name: string; cat: Cat; deck: Deck; fmt: Midia[]; week?: number; source?: string; essence: string; why: string; how: string[]; combo?: number[] };
 
 /** categoria de cada carta da Hannah dentro da taxonomia VINCIT */
 const HCAT: Record<number, Cat> = { 1: "visual", 2: "ideacao", 3: "ideacao", 4: "ganchos", 5: "video", 6: "copy", 7: "visual", 8: "copy", 9: "visual", 10: "visual", 11: "video", 12: "elementos", 13: "ganchos", 14: "estrutura", 15: "visual", 16: "copy", 17: "estrutura", 18: "copy", 19: "estrutura", 20: "video", 21: "elementos", 22: "elementos", 23: "video", 24: "estrutura", 25: "elementos", 26: "elementos", 27: "video", 28: "estrutura", 29: "ideacao", 30: "elementos", 31: "estrutura", 32: "ganchos" };
@@ -155,11 +165,11 @@ const HANNAH_RAW: any[] = [
 ];
 
 export const FORMATS: Format[] = [
-  ...HANNAH_RAW.map((f) => ({ ...f, cat: HCAT[f.n], deck: "hannah" as Deck, source: "Hannah Franklin · Desafio Formato Criativo" })),
+  ...HANNAH_RAW.map((f) => ({ ...f, ...HANNAH_PATCH[f.n], cat: HCAT[f.n], deck: "hannah" as Deck, source: "Hannah Franklin · Desafio Formato Criativo" })),
   ...VINCIT,
 ];
 
-export const formatBrief = () => FORMATS.map((f) => `${f.n}. ${f.name} (${CATS[f.cat].l}): ${f.essence}`).join("\n");
+export const formatBrief = (m?: Midia) => FORMATS.filter((f) => !m || f.fmt.includes(m)).map((f) => `${f.n}. ${f.name} (${CATS[f.cat].l}) [${f.fmt.map((x) => MIDIAS[x].l).join(", ")}]: ${f.essence}`).join("\n");
 
 /** Exemplos citados em cada carta do quadro original (links públicos) */
 export const REFS: Record<number, string[]> = {

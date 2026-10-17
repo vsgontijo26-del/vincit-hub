@@ -84,7 +84,7 @@ export default function Pauta() {
             <div className="flex justify-between items-center mb-5"><span className="chip">{sel.kind}</span><button className="text-fog text-sm hover:text-paper" onClick={() => setSel(null)}>Fechar</button></div>
             <label className="label">Título</label><input className="input mb-4" value={sel.title} onChange={(e) => setSel({ ...sel, title: e.target.value })} />
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div><label className="label">Formato</label><select className="input" value={sel.format || ""} onChange={(e) => setSel({ ...sel, format: e.target.value })}><option value="">–</option>{["Reels", "Carrossel", "Foto", "Stories", "Live"].map((x) => <option key={x}>{x}</option>)}</select></div>
+              <div><label className="label">Formato</label><select className="input" value={sel.format || ""} onChange={(e) => setSel({ ...sel, format: e.target.value })}><option value="">–</option>{["Reels", "YouTube", "Carrossel", "Foto", "Stories", "Live"].map((x) => <option key={x}>{x}</option>)}</select></div>
               <div><label className="label">Data</label><input type="date" className="input" value={sel.planned_for || ""} onChange={(e) => setSel({ ...sel, planned_for: e.target.value })} /></div>
               <div><label className="label">Perfil</label><select className="input" value={sel.account_id || ""} onChange={(e) => setSel({ ...sel, account_id: e.target.value })}><option value="">–</option>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select></div>
             </div>

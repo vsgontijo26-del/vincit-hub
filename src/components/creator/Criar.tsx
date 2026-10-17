@@ -7,7 +7,7 @@ import AccountSelect from "@/components/AccountSelect";
 import Markdown from "@/components/Markdown";
 import CopyButton from "@/components/CopyButton";
 import { I } from "@/components/icons";
-import { FORMATS } from "@/lib/formats";
+import { FORMATS, DELIVERY_FORMATS, FORMAT_MIDIA, MIDIAS } from "@/lib/formats";
 
 export default function Criar() {
   const { accounts } = useAccounts();
@@ -24,6 +24,8 @@ export default function Criar() {
     if (r) setF((x) => ({ ...x, refId: r }));
     const c = new URLSearchParams(location.search).get("carta");
     if (c) setF((x) => ({ ...x, card: c }));
+    const fm = new URLSearchParams(location.search).get("format");
+    if (fm && DELIVERY_FORMATS.includes(fm)) setF((x) => ({ ...x, format: fm }));
   }, []);
 
   async function go(e: React.FormEvent) {
@@ -47,7 +49,7 @@ export default function Criar() {
           <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={accountId} onChange={setAccountId} /></div>
           <div><label className="label">Tema do conteúdo</label><textarea required className="input" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} placeholder="3 erros que deixam o vídeo da sua empresa com cara de amador" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="label">Formato</label>{opt("format", ["Reels", "Carrossel", "Foto", "Stories"])}</div>
+            <div><label className="label">Formato</label><select className="input" value={f.format} onChange={(e) => { const format = e.target.value; const card = FORMATS.find((x) => x.id === f.card); setF({ ...f, format, card: card && !card.fmt.includes(FORMAT_MIDIA[format]) ? "" : f.card }); }}>{DELIVERY_FORMATS.map((v) => <option key={v} value={v}>{v === "YouTube" ? "YouTube (vídeo longo)" : v}</option>)}</select></div>
             <div><label className="label">Objetivo</label>{opt("goal", ["Engajamento", "Alcance / viral", "Autoridade", "Gerar leads", "Venda"])}</div>
           </div>
           <div><label className="label">Tom</label>{opt("tone", ["Direto e confiante", "Educativo", "Bem-humorado", "Inspirador", "Bastidores / pessoal"])}</div>
@@ -55,7 +57,8 @@ export default function Criar() {
           <div><label className="label">Usar estrutura de referência</label>
             <select className="input" value={f.refId} onChange={(e) => setF({ ...f, refId: e.target.value })}><option value="">Nenhuma</option>{refs.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}</select></div>
           <div><label className="label">Formato criativo (carta)</label>
-            <select className="input" value={f.card} onChange={(e) => setF({ ...f, card: e.target.value })}><option value="">Deixar a IA escolher</option>{FORMATS.map((x) => <option key={x.id} value={x.id}>{x.n}. {x.name}</option>)}</select></div>
+            <select className="input" value={f.card} onChange={(e) => setF({ ...f, card: e.target.value })}><option value="">Deixar a IA escolher</option>{FORMATS.filter((x) => x.fmt.includes(FORMAT_MIDIA[f.format])).map((x) => <option key={x.id} value={x.id}>{x.n}. {x.name}</option>)}</select>
+            <p className="text-[11px] text-fog mt-1">Mostrando só cartas de {MIDIAS[FORMAT_MIDIA[f.format]].l.toLowerCase()}.</p></div>
           <button disabled={ai.busy} className="btn btn-mint w-full"><I.pen className="w-4 h-4" />{ai.busy ? "Escrevendo…" : "Gerar conteúdo"}</button>
           {ai.error && <p className="text-danger text-sm">{ai.error}</p>}
         </form>

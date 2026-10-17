@@ -59,7 +59,7 @@ export default function Referencias() {
       <form onSubmit={analyze} className="card p-5 grid md:grid-cols-3 gap-4 mb-8">
         <div><label className="label">Título</label><input required className="input" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Reels bastidores com 2M views" /></div>
         <div><label className="label">Perfil (@)</label><input className="input" value={f.handle} onChange={(e) => setF({ ...f, handle: e.target.value })} placeholder="@referencia" /></div>
-        <div><label className="label">Formato</label><select className="input" value={f.format} onChange={(e) => setF({ ...f, format: e.target.value })}>{["Reels", "Carrossel", "Foto", "Stories", "Anúncio", "YouTube/TikTok"].map((x) => <option key={x}>{x}</option>)}</select></div>
+        <div><label className="label">Formato</label><select className="input" value={f.format} onChange={(e) => setF({ ...f, format: e.target.value })}>{["Reels", "Carrossel", "Foto", "Stories", "YouTube", "TikTok", "Anúncio"].map((x) => <option key={x}>{x}</option>)}</select></div>
         <div className="md:col-span-2"><label className="label">Link</label><input type="url" className="input" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} placeholder="https://instagram.com/reel/…" /></div>
         <div><label className="label">Tags</label><input className="input" value={f.tags} onChange={(e) => setF({ ...f, tags: e.target.value })} placeholder="bastidores, humor" /></div>
         <div><label className="label">Views do post</label><input inputMode="numeric" className="input" value={f.views} onChange={(e) => setF({ ...f, views: e.target.value })} placeholder="2400000" /></div>

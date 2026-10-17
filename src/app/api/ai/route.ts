@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { callClaude, extractJson } from "@/lib/ai";
 import { AGENTS } from "@/lib/agents";
-import { FORMATS, CATS, formatBrief } from "@/lib/formats";
+import { FORMATS, CATS, MIDIAS, FORMAT_MIDIA, formatBrief } from "@/lib/formats";
+import { EXAMPLES } from "@/lib/formats-examples";
 
 export const maxDuration = 300;
 
@@ -43,8 +44,8 @@ export async function POST(req: Request) {
 
     if (task === "copy") {
       const text = await callClaude({
-        maxTokens: 4000,
-        prompt: `${ctx}\nCrie o conteúdo:\nTema: ${data.topic}\nFormato: ${data.format}\nObjetivo: ${data.goal}\nTom: ${data.tone}\n${data.keyword ? `CTA de automação: pedir para comentar a palavra "${data.keyword}" para receber no direct.` : ""}\n${data.reference ? `Use como referência de estrutura:\n${data.reference}` : ""}\n\nMétodo:\n- Ganchos de até 12 palavras, cada um com uma fórmula diferente (contradição, número específico, erro comum, segredo/bastidor, mistério, POV, pergunta que dói, antes × depois…). Indique a fórmula entre parênteses.\n- ${data.format === "Carrossel" ? "Carrossel de 7 a 10 slides: slide 1 título-gancho com promessa concreta, uma ideia por slide, um slide de virada (efeito A-há), penúltimo com resumo em checklist, último com um único CTA; sugestão visual entre colchetes." : data.format === "Reels" ? "Roteiro em blocos com tempo, cena/visual, fala e texto na tela; gancho nos 2 primeiros segundos; ~2,5 palavras por segundo de fala." : "Conteúdo direto, uma ideia central."}\n- Legenda: 1ª linha funciona sozinha (até 125 caracteres), diga se o trabalho da legenda é complementar o vídeo ou converter, um único CTA.\n- SEO: 3 palavras-chave para usar na 1ª linha, no texto na tela e no texto alternativo + até 5 hashtags específicas.\n\nEntregue em markdown:\n## 5 opções de gancho\n## ${data.format === "Carrossel" ? "Texto slide a slide" : data.format === "Reels" ? "Roteiro (tempo · cena · fala · texto na tela)" : "Conteúdo"}\n## Legenda pronta\n## CTA\n## Palavras-chave e hashtags (até 5)${data.format_card ? `\n\nUse o formato criativo \"${data.format_card}\" na construção do roteiro e explique em 1 linha como ele foi aplicado.` : ""}`,
+        maxTokens: data.format === "YouTube" ? 7000 : 4000,
+        prompt: `${ctx}\nCrie o conteúdo:\nTema: ${data.topic}\nFormato: ${data.format}\nObjetivo: ${data.goal}\nTom: ${data.tone}\n${data.keyword ? `CTA de automação: pedir para comentar a palavra "${data.keyword}" para receber no direct.` : ""}\n${data.reference ? `Use como referência de estrutura:\n${data.reference}` : ""}\n\nMétodo:\n- Ganchos de até 12 palavras, cada um com uma fórmula diferente (contradição, número específico, erro comum, segredo/bastidor, mistério, POV, pergunta que dói, antes × depois…). Indique a fórmula entre parênteses.\n- ${data.format === "YouTube" ? "Vídeo longo para YouTube: 3 títulos de até 60 caracteres (régua 4U), 3 ideias de thumbnail (texto de até 4 palavras + descrição da imagem), gancho dos primeiros 30 segundos (promessa + prova do que vem), roteiro em capítulos com minutagem, um re-gancho a cada ~2 minutos, CTA no meio e no fim, descrição com palavras-chave e capítulos." : data.format === "Carrossel" ? "Carrossel de 7 a 10 slides: slide 1 título-gancho com promessa concreta, uma ideia por slide, um slide de virada (efeito A-há), penúltimo com resumo em checklist, último com um único CTA; sugestão visual entre colchetes." : data.format === "Reels" ? "Roteiro em blocos com tempo, cena/visual, fala e texto na tela; gancho nos 2 primeiros segundos; ~2,5 palavras por segundo de fala." : "Conteúdo direto, uma ideia central."}\n- Legenda: 1ª linha funciona sozinha (até 125 caracteres), diga se o trabalho da legenda é complementar o vídeo ou converter, um único CTA.\n- SEO: 3 palavras-chave para usar na 1ª linha, no texto na tela e no texto alternativo + até 5 hashtags específicas.\n\nEntregue em markdown:\n## 5 opções de gancho\n${data.format === "YouTube" ? "## 3 títulos\n## 3 thumbnails\n## Gancho (0–30s)\n## Roteiro por capítulos (minutagem · cena/visual · fala · re-ganchos)\n## CTA\n## Descrição com capítulos e palavras-chave" : `## ${data.format === "Carrossel" ? "Texto slide a slide" : data.format === "Reels" || data.format === "Stories" ? "Roteiro (tempo · cena · fala · texto na tela)" : "Conteúdo"}\n## Legenda pronta\n## CTA\n## Palavras-chave e hashtags (até 5)`}${data.format_card ? `\n\nUse o formato criativo \"${data.format_card}\" na construção do roteiro e explique em 1 linha como ele foi aplicado.` : ""}`,
       });
       return NextResponse.json({ text });
     }
@@ -72,10 +73,10 @@ export async function POST(req: Request) {
       const f = FORMATS.find((x) => x.id === data.card);
       const f2 = data.card2 ? FORMATS.find((x) => x.id === data.card2) : null;
       if (!f) return NextResponse.json({ error: "Carta desconhecida" }, { status: 400 });
-      const desc = (x: typeof f) => `Carta ${x.n} · ${x.name} (${CATS[x.cat].l}${x.source ? ` · ${x.source}` : ""})\nEssência: ${x.essence}\nPor que funciona: ${x.why}\nComo aplicar: ${x.how.join(" ")}`;
+      const desc = (x: typeof f) => `Carta ${x.n} · ${x.name} (${CATS[x.cat].l}${x.source ? ` · ${x.source}` : ""})\nEssência: ${x.essence}\nPor que funciona: ${x.why}\nComo aplicar: ${x.how.join(" ")}\nExemplo de estrutura: ${(EXAMPLES[x.id] || []).map(([a, b]) => `${a}: ${b}`).join(" | ")}`;
       const text = await callClaude({
-        maxTokens: 3500,
-        prompt: `${ctx}\nAplique o formato criativo abaixo${f2 ? " combinado com o segundo" : ""} ao tema.\n\n${desc(f)}${f2 ? `\n\n${desc(f2)}` : ""}\n\nTema: ${data.topic}\nFormato de entrega: ${data.format || "Reels"}\nObjetivo: ${data.goal || "alcance e conexão"}\n\nEntregue em markdown:\n## Ideia em 1 frase\n## 3 opções de gancho\n## Roteiro (tabela mental: tempo · cena/visual · fala · texto na tela)\n## Dicas de gravação e edição para essa carta\n## Legenda (1ª linha forte, 1 CTA, até 5 hashtags)\n## Por que essa carta funciona aqui (2 linhas)`,
+        maxTokens: data.format === "YouTube" ? 7000 : 3500,
+        prompt: `${ctx}\nAplique o formato criativo abaixo${f2 ? " combinado com o segundo" : ""} ao tema.\n\n${desc(f)}${f2 ? `\n\n${desc(f2)}` : ""}\n\nTema: ${data.topic}\nFormato de entrega: ${data.format || "Reels"}\nObjetivo: ${data.goal || "alcance e conexão"}\n\nEntregue em markdown:\n## Ideia em 1 frase\n## 3 opções de gancho\n${data.format === "YouTube" ? "## Título e thumbnail (3 opções)\n## Roteiro por capítulos (minutagem · cena/visual · fala · re-ganchos a cada ~2 min)\n## Dicas de gravação e edição para essa carta\n## Descrição com capítulos" : data.format === "Carrossel" || data.format === "Foto" ? "## Texto slide a slide (com sugestão visual)\n## Dicas de design para essa carta\n## Legenda (1ª linha forte, 1 CTA, até 5 hashtags)" : "## Roteiro (tempo · cena/visual · fala · texto na tela)\n## Dicas de gravação e edição para essa carta\n## Legenda (1ª linha forte, 1 CTA, até 5 hashtags)"}\n## Por que essa carta funciona aqui (2 linhas)`,
       });
       return NextResponse.json({ text });
     }
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
     if (task === "format_suggest") {
       const text = await callClaude({
         maxTokens: 2500,
-        prompt: `${ctx}\nTema: ${data.topic}\n\nBiblioteca de cartas (número. nome (categoria): essência):\n${formatBrief()}\n\nEscolha 3 combinações diferentes de 2 ou 3 cartas que deixariam esse tema original e fora do padrão. Misture categorias (ex.: um gancho + uma estrutura + um recurso visual). Responda em markdown, para cada combinação:\n### Combinação N: nome curto\n**Cartas:** número e nome de cada\n**Ideia:** 2-3 frases descrevendo o vídeo/post\n**Gancho:** frase pronta\nNo fim, 1 linha dizendo qual das 3 você gravaria primeiro e por quê.`,
+        prompt: `${ctx}\nTema: ${data.topic}\nFormato de entrega: ${data.format || "qualquer"}\n\nBiblioteca de cartas (número. nome (categoria) [mídias]: essência):\n${formatBrief(data.format ? FORMAT_MIDIA[data.format] : undefined)}\n\nEscolha 3 combinações diferentes de 2 ou 3 cartas que deixariam esse tema original e fora do padrão. Misture categorias (ex.: um gancho + uma estrutura + um recurso visual). Responda em markdown, para cada combinação:\n### Combinação N: nome curto\n**Cartas:** número e nome de cada\n**Ideia:** 2-3 frases descrevendo o vídeo/post\n**Gancho:** frase pronta\nNo fim, 1 linha dizendo qual das 3 você gravaria primeiro e por quê.`,
       });
       return NextResponse.json({ text });
     }
