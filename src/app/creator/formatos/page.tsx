@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAccounts } from "@/lib/useAccounts";
 import { useAI } from "@/lib/useAI";
-import { FORMATS, CATS, REFS, TRELLO, refLabel, type Cat, type Format } from "@/lib/formats";
+import { FORMATS, CATS, DECKS, REFS, TRELLO, refLabel, type Cat, type Deck, type Format } from "@/lib/formats";
 import PageHead from "@/components/PageHead";
 import AccountSelect from "@/components/AccountSelect";
 import Markdown from "@/components/Markdown";
@@ -18,6 +18,9 @@ export default function Formatos() {
   const { accounts } = useAccounts();
   const [cat, setCat] = useState<Cat | "">("");
   const [q, setQ] = useState("");
+  const [deck, setDeck] = useState<Deck | "">("");
+  const [sug, setSug] = useState({ topic: "", out: "" });
+  const sugAI = useAI();
   const [sel, setSel] = useState<Format | null>(null);
   const [done, setDone] = useState<number[]>([]);
   const [f, setF] = useState({ topic: "", format: "Reels", goal: "Alcance e conexão", card2: "", accountId: "" });
@@ -31,7 +34,7 @@ export default function Formatos() {
     setDone(v); try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {}
   }
   function open(x: Format) { setSel(x); setOut(""); setSaved(false); setF((p) => ({ ...p, card2: "" })); }
-  function draw() { const pool = FORMATS.filter((x) => !done.includes(x.n)); const list = pool.length ? pool : FORMATS; open(list[Math.floor(Math.random() * list.length)]); }
+  function draw() { const base = list.length ? list : FORMATS; const pool = base.filter((x) => !done.includes(x.n)); const pick = pool.length ? pool : base; open(pick[Math.floor(Math.random() * pick.length)]); }
 
   async function apply(e: React.FormEvent) {
     e.preventDefault(); if (!sel) return; setSaved(false);
@@ -44,24 +47,42 @@ export default function Formatos() {
     setSaved(true);
   }
 
-  const list = FORMATS.filter((x) => (!cat || x.cat === cat) && (!q || `${x.name} ${x.essence} ${x.why}`.toLowerCase().includes(q.toLowerCase())));
+  async function suggest(e: React.FormEvent) {
+    e.preventDefault();
+    const r = await sugAI.run<{ text: string }>("format_suggest", { topic: sug.topic, account: accounts[0] });
+    if (r) setSug({ ...sug, out: r.text });
+  }
+
+  const list = FORMATS.filter((x) => (!cat || x.cat === cat) && (!deck || x.deck === deck) && (!q || `${x.name} ${x.essence} ${x.why} ${x.source || ""}`.toLowerCase().includes(q.toLowerCase())));
 
   return (
     <>
-      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Formatos criativos" desc="32 cartas para fugir do mais do mesmo: estude o porquê, aplique ao seu tema com a IA e combine cartas. Baseado no desafio de Hannah Franklin." />
+      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Formatos criativos" desc={`${FORMATS.length} cartas de ideação, ganchos, copy, storytelling, formatos de vídeo, cinema e estratégia para fugir do mais do mesmo. Estude o porquê, aplique ao seu tema com a IA e combine cartas.`} />
 
       <div className="card p-4 mb-5 flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-[200px]">
-          <div className="flex justify-between text-xs mb-1.5"><span className="text-fog">Seu desafio de 32 cartas</span><span className="font-mono text-mint">{done.length}/32</span></div>
-          <div className="h-1.5 bg-panel2 rounded-full overflow-hidden"><div className="h-full bg-mint rounded-full transition-all" style={{ width: `${(done.length / 32) * 100}%` }} /></div>
+          <div className="flex justify-between text-xs mb-1.5"><span className="text-fog">Cartas que você já aplicou</span><span className="font-mono text-mint">{done.length}/{FORMATS.length}</span></div>
+          <div className="h-1.5 bg-panel2 rounded-full overflow-hidden"><div className="h-full bg-mint rounded-full transition-all" style={{ width: `${(done.length / FORMATS.length) * 100}%` }} /></div>
         </div>
         <button onClick={draw} className="btn btn-mint btn-sm"><I.spark className="w-4 h-4" />Sortear carta</button>
-        <a href="/formatos-criativos-vincit.pdf" target="_blank" className="btn btn-ghost btn-sm">Guia em PDF</a>
+        <a href="/banco-criativo-vincit.pdf" target="_blank" className="btn btn-ghost btn-sm">Guia completo (PDF)</a>
       </div>
 
+      <form onSubmit={suggest} className="card p-4 mb-5">
+        <p className="font-display font-bold">Não sabe qual carta usar?</p>
+        <p className="text-xs text-fog mb-3">Descreva o tema e a IA indica 3 combinações de cartas com a ideia de cada uma.</p>
+        <div className="flex gap-2"><input required className="input" value={sug.topic} onChange={(e) => setSug({ ...sug, topic: e.target.value })} placeholder="Ex.: mostrar que vídeo institucional pode ser emocionante" /><button disabled={sugAI.busy} className="btn btn-mint btn-sm whitespace-nowrap"><I.spark className="w-4 h-4" />{sugAI.busy ? "Pensando…" : "Sugerir"}</button></div>
+        {sugAI.error && <p className="text-danger text-sm mt-2">{sugAI.error}</p>}
+        {sug.out && <div className="mt-4 border-t border-line pt-4"><Markdown text={sug.out} /></div>}
+      </form>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button onClick={() => setDeck("")} className={`btn btn-sm ${!deck ? "btn-mint" : "btn-ghost"}`}>Todas as fontes</button>
+        {(Object.keys(DECKS) as Deck[]).map((k) => <button key={k} onClick={() => setDeck(k)} className={`btn btn-sm ${deck === k ? "btn-mint" : "btn-ghost"}`}>{DECKS[k]}</button>)}
+      </div>
       <div className="flex flex-wrap gap-2 mb-5">
         <button onClick={() => setCat("")} className={`btn btn-sm ${!cat ? "btn-mint" : "btn-ghost"}`}>Todas</button>
-        {(Object.keys(CATS) as Cat[]).map((k) => <button key={k} onClick={() => setCat(k)} className={`btn btn-sm ${cat === k ? "btn-mint" : "btn-ghost"}`}><span className="w-2 h-2 rounded-full" style={{ background: CATS[k].c }} />{CATS[k].l}</button>)}
+        {(Object.keys(CATS) as Cat[]).map((k) => <button key={k} onClick={() => setCat(k)} className={`btn btn-sm ${cat === k ? "btn-mint" : "btn-ghost"}`}><span className="w-2 h-2 rounded-full" style={{ background: CATS[k].c }} />{CATS[k].l}<span className="opacity-60">{FORMATS.filter((x) => x.cat === k && (!deck || x.deck === deck)).length}</span></button>)}
         <input className="input !py-1.5 !w-48 ml-auto" placeholder="Buscar carta…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       {cat && <p className="text-sm text-fog mb-4">{CATS[cat].d}</p>}
@@ -72,7 +93,7 @@ export default function Formatos() {
             <span className="absolute inset-x-0 top-0 h-0.5" style={{ background: CATS[x.cat].c }} />
             <div className="flex items-center justify-between">
               <span className="font-mono text-[11px] text-fog">CARTA {String(x.n).padStart(2, "0")}</span>
-              {done.includes(x.n) ? <span className="text-mint text-xs">✓ feita</span> : <span className="text-[10px] text-fog">sem. {x.week}</span>}
+              {done.includes(x.n) ? <span className="text-mint text-xs">✓ feita</span> : <span className="text-[10px] text-fog">{x.deck === "hannah" ? "Hannah" : "VINCIT"}</span>}
             </div>
             <p className="font-display font-bold text-lg mt-2 leading-tight">{x.name}</p>
             <p className="text-sm text-fog mt-1.5 line-clamp-3">{x.essence}</p>
@@ -86,6 +107,7 @@ export default function Formatos() {
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="chip" style={{ color: CATS[sel.cat].c, borderColor: CATS[sel.cat].c + "55" }}>{CATS[sel.cat].l}</span>
+              {sel.source && <span className="text-xs text-fog">Fonte: {sel.source}</span>}
               <button onClick={() => toggleDone(sel.n)} className={`btn btn-sm ${done.includes(sel.n) ? "btn-mint" : "btn-ghost"}`}>{done.includes(sel.n) ? "✓ Já apliquei" : "Marcar como aplicada"}</button>
             </div>
             <p className="font-display text-xl leading-snug">{sel.essence}</p>
@@ -97,13 +119,14 @@ export default function Formatos() {
 
             <div><p className="label">Referências</p><div className="flex flex-wrap gap-1.5">
               {(REFS[sel.n] || []).map((u, i) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="chip hover:text-mint"><I.link className="w-3 h-3" />{refLabel(u)} {i + 1}</a>)}
+              {!REFS[sel.n] && !TRELLO[sel.n] && <span className="text-xs text-fog">Busque exemplos: <a className="text-mint hover:underline" target="_blank" rel="noopener noreferrer" href={`https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(sel.name)}`}>Instagram</a> · <a className="text-mint hover:underline" target="_blank" rel="noopener noreferrer" href={`https://www.youtube.com/results?search_query=${encodeURIComponent(sel.name + " exemplo")}`}>YouTube</a></span>}
               {TRELLO[sel.n] && <a href={TRELLO[sel.n]} target="_blank" rel="noopener noreferrer" className="chip hover:text-mint"><I.link className="w-3 h-3" />Carta original no Trello</a>}
             </div></div>
             <form onSubmit={apply} className="bg-panel2 rounded-xl p-4 grid md:grid-cols-2 gap-3">
               <p className="md:col-span-2 font-display font-bold">Aplicar ao meu tema</p>
               <div className="md:col-span-2"><label className="label">Tema</label><input required className="input" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} placeholder="Ex.: por que vídeo institucional não precisa ser chato" /></div>
               <div><label className="label">Formato</label><select className="input" value={f.format} onChange={(e) => setF({ ...f, format: e.target.value })}>{["Reels", "Carrossel", "Stories", "Foto"].map((x) => <option key={x}>{x}</option>)}</select></div>
-              <div><label className="label">Combinar com (opcional)</label><select className="input" value={f.card2} onChange={(e) => setF({ ...f, card2: e.target.value })}><option value="">Só esta carta</option>{FORMATS.filter((x) => x.id !== sel.id).map((x) => <option key={x.id} value={x.id}>{x.n}. {x.name}</option>)}</select></div>
+              <div><label className="label">Combinar com (opcional)</label><select className="input" value={f.card2} onChange={(e) => setF({ ...f, card2: e.target.value })}><option value="">Só esta carta</option>{FORMATS.filter((x) => x.id !== sel.id).sort((a, b) => a.name.localeCompare(b.name)).map((x) => <option key={x.id} value={x.id}>{x.n}. {x.name}</option>)}</select></div>
               <div><label className="label">Objetivo</label><select className="input" value={f.goal} onChange={(e) => setF({ ...f, goal: e.target.value })}>{["Alcance e conexão", "Autoridade", "Gerar leads", "Venda", "Comunidade"].map((x) => <option key={x}>{x}</option>)}</select></div>
               <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={f.accountId} onChange={(v) => setF({ ...f, accountId: v })} /></div>
               <div className="md:col-span-2 flex flex-wrap gap-2 justify-end">

@@ -1,18 +1,29 @@
+import { VINCIT } from "./formats-vincit";
+
 /**
  * Biblioteca de formatos criativos — estudo baseado no "Desafio Formato Criativo 32 dias" (Hannah Franklin).
  * Resumos e aplicações escritos pela VINCIT; não é cópia do material original.
  */
-export type Cat = "visual" | "roteiro" | "estrutura" | "elementos";
+export type Cat = "ideacao" | "ganchos" | "copy" | "estrutura" | "elementos" | "video" | "visual" | "estrategia";
 export const CATS: Record<Cat, { l: string; d: string; c: string }> = {
-  visual: { l: "Criatividade · Visual", d: "Como o vídeo é filmado, editado e encenado.", c: "#6eefb6" },
-  roteiro: { l: "Criatividade · Roteiro", d: "De onde vem a ideia e o que se fala.", c: "#7aa7ff" },
-  estrutura: { l: "Storytelling · Estrutura", d: "O esqueleto que organiza a narrativa.", c: "#f5c84c" },
-  elementos: { l: "Storytelling · Elementos", d: "Temperos que dão emoção e memória à história.", c: "#c084fc" },
+  ideacao: { l: "Ideação", d: "De onde vem a ideia: métodos para gerar e combinar ideias.", c: "#a3e635" },
+  ganchos: { l: "Ganchos & retenção", d: "Parar o scroll nos primeiros segundos e segurar até o fim.", c: "#ff6b6b" },
+  copy: { l: "Copy & persuasão", d: "Frameworks de texto, argumento e conversão.", c: "#7aa7ff" },
+  estrutura: { l: "Estruturas narrativas", d: "O esqueleto que organiza a história do início ao fim.", c: "#f5c84c" },
+  elementos: { l: "Elementos de storytelling", d: "Temperos que dão emoção, tensão e memória.", c: "#c084fc" },
+  video: { l: "Formatos de vídeo", d: "Moldes de conteúdo prontos para gravar.", c: "#6eefb6" },
+  visual: { l: "Linguagem visual & cinema", d: "Câmera, corte, som, cor e encenação.", c: "#22d3ee" },
+  estrategia: { l: "Estratégia de conteúdo", d: "O que postar, para quem, em que ordem e por quê.", c: "#fb923c" },
 };
+export const DECKS = { hannah: "Desafio Hannah Franklin (32 cartas)", vincit: "Biblioteca VINCIT" } as const;
+export type Deck = keyof typeof DECKS;
 
-export type Format = { n: number; id: string; name: string; cat: Cat; week: number; essence: string; why: string; how: string[]; combo?: number[] };
+export type Format = { n: number; id: string; name: string; cat: Cat; deck: Deck; week?: number; source?: string; essence: string; why: string; how: string[]; combo?: number[] };
 
-export const FORMATS: Format[] = [
+/** categoria de cada carta da Hannah dentro da taxonomia VINCIT */
+const HCAT: Record<number, Cat> = { 1: "visual", 2: "ideacao", 3: "ideacao", 4: "ganchos", 5: "video", 6: "copy", 7: "visual", 8: "copy", 9: "visual", 10: "visual", 11: "video", 12: "elementos", 13: "ganchos", 14: "estrutura", 15: "visual", 16: "copy", 17: "estrutura", 18: "copy", 19: "estrutura", 20: "video", 21: "elementos", 22: "elementos", 23: "video", 24: "estrutura", 25: "elementos", 26: "elementos", 27: "video", 28: "estrutura", 29: "ideacao", 30: "elementos", 31: "estrutura", 32: "ganchos" };
+
+const HANNAH_RAW: any[] = [
   { n: 1, id: "angulos", name: "Ângulos", cat: "visual", week: 1,
     essence: "Filmar de onde ninguém filma para quebrar o padrão visual do feed.",
     why: "O olho do espectador está acostumado ao enquadramento frontal; um ponto de vista inesperado gera estranhamento e segura os primeiros segundos.",
@@ -141,6 +152,11 @@ export const FORMATS: Format[] = [
     essence: "Abrir uma lacuna de curiosidade e só fechar no fim.",
     why: "Curiosidade é o gatilho mais forte para retenção.",
     how: ["Fale de algo que o público já conhece e se interessa.", "Mostre que há algo ali que ele ainda não sabe.", "Segure a revelação até o final do vídeo."], combo: [22, 26, 4] },
+];
+
+export const FORMATS: Format[] = [
+  ...HANNAH_RAW.map((f) => ({ ...f, cat: HCAT[f.n], deck: "hannah" as Deck, source: "Hannah Franklin · Desafio Formato Criativo" })),
+  ...VINCIT,
 ];
 
 export const formatBrief = () => FORMATS.map((f) => `${f.n}. ${f.name} (${CATS[f.cat].l}): ${f.essence}`).join("\n");

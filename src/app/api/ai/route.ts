@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { callClaude, extractJson } from "@/lib/ai";
 import { AGENTS } from "@/lib/agents";
-import { FORMATS, CATS } from "@/lib/formats";
+import { FORMATS, CATS, formatBrief } from "@/lib/formats";
 
 export const maxDuration = 300;
 
@@ -72,10 +72,18 @@ export async function POST(req: Request) {
       const f = FORMATS.find((x) => x.id === data.card);
       const f2 = data.card2 ? FORMATS.find((x) => x.id === data.card2) : null;
       if (!f) return NextResponse.json({ error: "Carta desconhecida" }, { status: 400 });
-      const desc = (x: typeof f) => `Carta ${x.n} · ${x.name} (${CATS[x.cat].l})\nEssência: ${x.essence}\nPor que funciona: ${x.why}\nComo aplicar: ${x.how.join(" ")}`;
+      const desc = (x: typeof f) => `Carta ${x.n} · ${x.name} (${CATS[x.cat].l}${x.source ? ` · ${x.source}` : ""})\nEssência: ${x.essence}\nPor que funciona: ${x.why}\nComo aplicar: ${x.how.join(" ")}`;
       const text = await callClaude({
         maxTokens: 3500,
         prompt: `${ctx}\nAplique o formato criativo abaixo${f2 ? " combinado com o segundo" : ""} ao tema.\n\n${desc(f)}${f2 ? `\n\n${desc(f2)}` : ""}\n\nTema: ${data.topic}\nFormato de entrega: ${data.format || "Reels"}\nObjetivo: ${data.goal || "alcance e conexão"}\n\nEntregue em markdown:\n## Ideia em 1 frase\n## 3 opções de gancho\n## Roteiro (tabela mental: tempo · cena/visual · fala · texto na tela)\n## Dicas de gravação e edição para essa carta\n## Legenda (1ª linha forte, 1 CTA, até 5 hashtags)\n## Por que essa carta funciona aqui (2 linhas)`,
+      });
+      return NextResponse.json({ text });
+    }
+
+    if (task === "format_suggest") {
+      const text = await callClaude({
+        maxTokens: 2500,
+        prompt: `${ctx}\nTema: ${data.topic}\n\nBiblioteca de cartas (número. nome (categoria): essência):\n${formatBrief()}\n\nEscolha 3 combinações diferentes de 2 ou 3 cartas que deixariam esse tema original e fora do padrão. Misture categorias (ex.: um gancho + uma estrutura + um recurso visual). Responda em markdown, para cada combinação:\n### Combinação N: nome curto\n**Cartas:** número e nome de cada\n**Ideia:** 2-3 frases descrevendo o vídeo/post\n**Gancho:** frase pronta\nNo fim, 1 linha dizendo qual das 3 você gravaria primeiro e por quê.`,
       });
       return NextResponse.json({ text });
     }
