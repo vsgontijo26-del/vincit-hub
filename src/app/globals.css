@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0c0c0d;
+  --color-panel: #151517;
+  --color-panel2: #1c1c1f;
+  --color-line: #2a2a2e;
+  --color-slate: #3d525a;
+  --color-fog: #8a8f94;
+  --color-paper: #f1f1f1;
+  --color-mint: #6eefb6;
+  --color-mint-dim: #2c6b52;
+  --color-danger: #ff6b6b;
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jet), ui-monospace, monospace;
+}
+
+html, body { background: var(--color-ink); color: var(--color-paper); }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--color-mint); color: #000; }
+
+.grain::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.input {
+  width: 100%; background: var(--color-panel2); border: 1px solid var(--color-line); border-radius: 10px;
+  padding: 10px 12px; color: var(--color-paper); font-size: 14px; outline: none; transition: border-color .15s;
+}
+.input:focus { border-color: var(--color-mint); }
+.input::placeholder { color: #5d6166; }
+textarea.input { min-height: 96px; resize: vertical; line-height: 1.5; }
+select.input { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #8a8f94 50%), linear-gradient(135deg, #8a8f94 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+
+.label { display: block; font-size: 12px; color: var(--color-fog); margin-bottom: 6px; letter-spacing: .02em; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; transition: all .15s; cursor: pointer; white-space: nowrap; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-mint { background: var(--color-mint); color: #06140e; }
+.btn-mint:hover:not(:disabled) { background: #8ff5c8; }
+.btn-ghost { border: 1px solid var(--color-line); color: var(--color-paper); background: transparent; }
+.btn-ghost:hover:not(:disabled) { border-color: var(--color-mint); color: var(--color-mint); }
+.btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+
+.card { background: var(--color-panel); border: 1px solid var(--color-line); border-radius: 16px; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--color-line); color: var(--color-fog); }
+.chip-mint { border-color: var(--color-mint-dim); color: var(--color-mint); background: rgba(110,239,182,.07); }
+
+.md h1, .md h2, .md h3 { font-family: var(--font-display); font-weight: 700; margin: 1.1em 0 .4em; color: var(--color-paper); }
+.md h1 { font-size: 20px; } .md h2 { font-size: 17px; } .md h3 { font-size: 15px; color: var(--color-mint); }
+.md p { margin: .5em 0; line-height: 1.65; color: #d6d7d8; }
+.md ul, .md ol { margin: .4em 0 .6em 1.2em; color: #d6d7d8; }
+.md ul { list-style: disc; } .md ol { list-style: decimal; }
+.md li { margin: .25em 0; line-height: 1.55; }
+.md strong { color: var(--color-paper); }
+.md code { font-family: var(--font-mono); font-size: 12px; background: var(--color-panel2); padding: 1px 5px; border-radius: 4px; }
+.md hr { border-color: var(--color-line); margin: 1em 0; }
+.md a { color: var(--color-mint); text-decoration: underline; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .5s cubic-bezier(.2,.7,.2,1) both; }
+
+.scroll-thin::-webkit-scrollbar { height: 6px; width: 6px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 6px; }
