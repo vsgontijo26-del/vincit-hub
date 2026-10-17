@@ -58,7 +58,7 @@ export default function Financeiro() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Financeiro" desc="Entradas, saídas, contas a receber e a pagar.">
+      <PageHead kicker="AGENCY · 02 ANÁLISE" title="Financeiro" desc="Entradas, saídas, contas a receber e a pagar.">
         <button className="btn btn-ghost" onClick={() => setForm({ kind: "saida", due_date: today() })}>− Despesa</button>
         <button className="btn btn-mint" onClick={() => setForm({ kind: "entrada", due_date: today() })}><I.plus className="w-4 h-4" />Receita</button>
       </PageHead>

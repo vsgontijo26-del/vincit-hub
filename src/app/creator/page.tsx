@@ -28,16 +28,16 @@ export default async function Overview() {
     ["Disparos de automação", n(runs)],
   ];
 
-  const quick = [
-    { href: "/creator/tendencias", t: "Buscar tendências", d: "Pesquisa ao vivo do que está em alta no seu nicho", Icon: I.trend },
-    { href: "/creator/referencias", t: "Analisar referência", d: "Desmonte um post que funcionou e gere um modelo de copy", Icon: I.bookmark },
-    { href: "/creator/copy", t: "Escrever copy", d: "Ganchos, roteiro de Reels, carrossel e legenda", Icon: I.pen },
-    { href: "/creator/automacoes", t: "Nova automação", d: "Comentou a palavra-chave, recebe no direct", Icon: I.bolt },
+  const flow = [
+    { n: "01", t: "Base", d: "Perfis conectados, nicho, objetivos e voz da marca.", links: [["Perfis & marca", "/creator/perfis"]] },
+    { n: "02", t: "Análise", d: "O que funciona no seu perfil e no mercado.", links: [["Desempenho", "/creator/desempenho"], ["Tendências", "/creator/tendencias"], ["Referências", "/creator/referencias"]] },
+    { n: "03", t: "Criação", d: "Da ideia ao roteiro testado.", links: [["Formatos criativos", "/creator/formatos"], ["Copy & roteiro", "/creator/copy"], ["Agentes", "/creator/agentes"], ["Laboratório", "/creator/laboratorio"]] },
+    { n: "04", t: "Execução", d: "Planejar, publicar e automatizar.", links: [["Planejador", "/creator/pauta"], ["Automações", "/creator/automacoes"]] },
   ];
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Visão geral" desc="Seu painel de produção de conteúdo: perfis, o que está performando e próximos passos." />
+      <PageHead kicker="CREATOR" title="Visão geral" desc="Base → análise → criação → execução. Seu fluxo de conteúdo em um só lugar." />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {kpis.map(([k, v], i) => (
@@ -59,12 +59,16 @@ export default async function Overview() {
       )}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
-        {quick.map(({ href, t, d, Icon }) => (
-          <Link key={href} href={href} className="card p-5 group hover:border-mint transition-colors">
-            <Icon className="w-5 h-5 text-mint" />
-            <p className="font-semibold mt-4">{t}</p>
-            <p className="text-fog text-sm mt-1">{d}</p>
-          </Link>
+        {flow.map((f, i) => (
+          <div key={f.n} className="card p-5 relative rise" style={{ animationDelay: `${i * 0.05}s` }}>
+            <p className="font-mono text-xs text-mint">{f.n}</p>
+            <p className="font-display font-bold text-xl mt-1">{f.t}</p>
+            <p className="text-fog text-sm mt-1 mb-4">{f.d}</p>
+            <div className="flex flex-col gap-1">
+              {f.links.map(([l, h]) => <Link key={h} href={h} className="flex items-center justify-between text-sm rounded-lg px-2.5 py-1.5 bg-panel2 hover:text-mint">{l}<I.arrow className="w-3.5 h-3.5" /></Link>)}
+            </div>
+            {i < 3 && <span className="hidden lg:block absolute -right-2.5 top-1/2 -translate-y-1/2 text-fog z-10">›</span>}
+          </div>
         ))}
       </div>
 
@@ -72,7 +76,7 @@ export default async function Overview() {
         <section className="lg:col-span-3 card p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-bold text-lg">Posts com mais engajamento</h2>
-            <Link href="/creator/perfis" className="text-xs text-fog hover:text-mint">Ver perfis</Link>
+            <Link href="/creator/desempenho" className="text-xs text-fog hover:text-mint">Ver desempenho</Link>
           </div>
           {!top.length ? <p className="text-fog text-sm py-8 text-center">Sincronize um perfil conectado para ver os posts aqui.</p> : (
             <ul className="divide-y divide-line">
@@ -92,8 +96,8 @@ export default async function Overview() {
         </section>
         <section className="lg:col-span-2 card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-lg">Pauta recente</h2>
-            <Link href="/creator/pauta" className="text-xs text-fog hover:text-mint">Abrir pauta</Link>
+            <h2 className="font-display font-bold text-lg">Planejador</h2>
+            <Link href="/creator/pauta" className="text-xs text-fog hover:text-mint">Abrir planejador</Link>
           </div>
           {!ideas?.length ? <p className="text-fog text-sm py-8 text-center">Ideias salvas de tendências, referências e copy aparecem aqui.</p> : (
             <ul className="space-y-2">

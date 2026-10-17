@@ -48,7 +48,7 @@ export default function Formatos() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Formatos criativos" desc="32 cartas para fugir do mais do mesmo: estude o porquê, aplique ao seu tema com a IA e combine cartas. Baseado no desafio de Hannah Franklin." />
+      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Formatos criativos" desc="32 cartas para fugir do mais do mesmo: estude o porquê, aplique ao seu tema com a IA e combine cartas. Baseado no desafio de Hannah Franklin." />
 
       <div className="card p-4 mb-5 flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-[200px]">

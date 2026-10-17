@@ -46,7 +46,7 @@ export default function Pauta() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Pauta" desc="Tudo que você salvou de tendências, referências e copy. Arraste entre as colunas.">
+      <PageHead kicker="CREATOR · 04 EXECUÇÃO" title="Planejador" desc="Tudo que você salvou de tendências, referências e copy. Arraste entre as colunas.">
         <select className="input w-auto" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="">Todos os perfis</option>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select>
       </PageHead>
       <form onSubmit={add} className="flex gap-2 mb-6"><input className="input" value={nw} onChange={(e) => setNw(e.target.value)} placeholder="Nova ideia rápida…" /><button className="btn btn-mint"><I.plus className="w-4 h-4" />Adicionar</button></form>

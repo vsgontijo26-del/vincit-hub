@@ -153,7 +153,7 @@ export default function Tarefas() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Tarefas" desc="Espaços, etapas e tags do seu jeito — no estilo ClickUp." />
+      <PageHead kicker="AGENCY · 04 EXECUÇÃO" title="Tarefas" desc="Espaços, etapas e tags do seu jeito — no estilo ClickUp." />
       <div className="grid lg:grid-cols-[230px_1fr] gap-5">
         <aside className="hidden lg:block card p-2 self-start sticky top-4">{sidebar}</aside>
 

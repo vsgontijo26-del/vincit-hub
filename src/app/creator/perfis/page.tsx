@@ -30,7 +30,7 @@ export default function Perfis() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Perfis & métricas" desc="Conecte perfis pela Meta para métricas reais e automações, ou cadastre manualmente.">
+      <PageHead kicker="CREATOR · 01 BASE" title="Perfis & marca" desc="A base de tudo: conecte perfis pela Meta (ou cadastre manualmente) e defina nicho, objetivos e voz da marca em Desempenho.">
         <button className="btn btn-ghost" onClick={() => setShow(!show)}><I.plus className="w-4 h-4" />Manual</button>
         <a href="/api/meta/connect" className="btn btn-mint"><I.camera className="w-4 h-4" />Conectar via Meta</a>
       </PageHead>
@@ -55,7 +55,7 @@ export default function Perfis() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {accounts.map((a, i) => (
-            <Link key={a.id} href={`/creator/perfis/${a.id}`} className="card p-5 hover:border-mint transition-colors rise" style={{ animationDelay: `${i * 0.04}s` }}>
+            <Link key={a.id} href={`/creator/desempenho/${a.id}`} className="card p-5 hover:border-mint transition-colors rise" style={{ animationDelay: `${i * 0.04}s` }}>
               <div className="flex items-center gap-3">
                 {a.profile_picture_url ? <img src={a.profile_picture_url} alt="" className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 rounded-full bg-panel2 grid place-items-center font-display font-bold text-mint">{a.username[0]?.toUpperCase()}</div>}
                 <div className="min-w-0">

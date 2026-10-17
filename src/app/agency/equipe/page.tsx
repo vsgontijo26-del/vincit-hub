@@ -28,7 +28,7 @@ export default function Equipe() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Equipe" desc="Quem faz parte do time, diárias e produtividade dos últimos 30 dias.">
+      <PageHead kicker="AGENCY · 01 BASE" title="Equipe" desc="Quem faz parte do time, diárias e produtividade dos últimos 30 dias.">
         <button className="btn btn-mint" onClick={() => setForm({ active: true })}><I.plus className="w-4 h-4" />Adicionar pessoa</button>
       </PageHead>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

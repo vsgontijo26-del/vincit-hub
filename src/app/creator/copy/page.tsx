@@ -43,7 +43,7 @@ export default function CopyPage() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Copy & roteiro" desc="Ganchos, roteiro de Reels, texto de carrossel, legenda e CTA, já integrados com a palavra-chave da automação." />
+      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Copy & roteiro" desc="Ganchos, roteiro de Reels, texto de carrossel, legenda e CTA, já integrados com a palavra-chave da automação." />
       <div className="grid lg:grid-cols-5 gap-5">
         <form onSubmit={go} className="lg:col-span-2 card p-5 space-y-4 h-fit">
           <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={accountId} onChange={setAccountId} /></div>

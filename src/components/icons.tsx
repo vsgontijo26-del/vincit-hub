@@ -22,4 +22,6 @@ export const I = {
   menu: (p: P) => (<svg {...base} className={p.className}><path d="M4 7h16M4 12h16M4 17h16"/></svg>),
   cards: (p: P) => (<svg {...base} className={p.className}><rect x="3" y="6" width="12" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>),
   flask: (p: P) => (<svg {...base} className={p.className}><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3M7 15h10"/></svg>),
+  chart: (p: P) => (<svg {...base} className={p.className}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>),
+  calendar: (p: P) => (<svg {...base} className={p.className}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>),
 };

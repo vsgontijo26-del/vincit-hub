@@ -54,7 +54,7 @@ export default function Referencias() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Referências" desc="Cole a legenda, transcrição ou descrição de um conteúdo que performou. A IA desmonta o gancho, a estrutura e gera um modelo de copy reutilizável." />
+      <PageHead kicker="CREATOR · 02 ANÁLISE" title="Referências" desc="Cole a legenda, transcrição ou descrição de um conteúdo que performou. A IA desmonta o gancho, a estrutura e gera um modelo de copy reutilizável." />
 
       <form onSubmit={analyze} className="card p-5 grid md:grid-cols-3 gap-4 mb-8">
         <div><label className="label">Título</label><input required className="input" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Reels bastidores com 2M views" /></div>

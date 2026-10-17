@@ -64,7 +64,7 @@ export default function Clientes() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Clientes" desc="Cadastro, ficha e onboarding de cada cliente.">
+      <PageHead kicker="AGENCY · 01 BASE" title="Clientes" desc="Cadastro, ficha e onboarding de cada cliente.">
         <button className="btn btn-mint" onClick={() => setForm({ status: "ativo" })}><I.plus className="w-4 h-4" />Novo cliente</button>
       </PageHead>
       <div className="flex flex-col md:flex-row gap-2 mb-5">

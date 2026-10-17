@@ -43,7 +43,7 @@ export default function Config() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Configurações" desc="Dados da produtora (aparecem nas propostas), metas e tabela de preços da calculadora." />
+      <PageHead kicker="AGENCY · 01 BASE" title="Configurações" desc="Dados da produtora (aparecem nas propostas), metas e tabela de preços da calculadora." />
       <div className="grid lg:grid-cols-5 gap-5">
         <form onSubmit={saveSettings} className="lg:col-span-2 card p-5 h-fit">
           <h2 className="font-display font-bold text-lg mb-4">Produtora</h2>

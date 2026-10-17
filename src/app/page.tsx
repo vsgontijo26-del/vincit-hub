@@ -6,14 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 const hubs = [
   {
     key: "creator", name: "CREATOR", href: "/creator", status: "Ativo",
-    desc: "Analista de Instagram: perfis, automações por comentário e DM, tendências, referências e copy.",
-    items: ["13 agentes de IA", "Formatos criativos", "Laboratório", "Perfis & métricas", "Automações", "Tendências", "Referências", "Copy", "Pauta"],
+    desc: "Conteúdo para Instagram em 4 etapas: base, análise, criação e execução.",
+    items: ["Perfis & marca", "Desempenho", "Tendências", "Referências", "Formatos criativos", "Copy & roteiro", "Agentes", "Laboratório", "Planejador", "Automações"],
     Icon: I.camera,
   },
   {
     key: "agency", name: "AGENCY", href: "/agency", status: "Ativo",
-    desc: "Gestão da produtora: projetos com aprovação do cliente, propostas, orçamento, financeiro, CRM, agenda, tarefas e equipamentos.",
-    items: ["Projetos", "Aprovação", "Propostas", "Financeiro", "CRM", "Agenda", "Equipamentos"],
+    desc: "Gestão da produtora em 4 etapas: base, análise, comercial e execução.",
+    items: ["Configurações", "Clientes", "Equipe", "Equipamentos", "Financeiro", "Funil", "Propostas", "Projetos", "Tarefas", "Agenda"],
     Icon: I.briefcase,
   },
 ];

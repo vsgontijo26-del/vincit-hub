@@ -54,7 +54,7 @@ export default function Agenda() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Agenda" desc="Captações, reuniões, entregas e pagamentos no mesmo calendário. Datas de projetos e recebimentos entram sozinhas.">
+      <PageHead kicker="AGENCY · 04 EXECUÇÃO" title="Agenda" desc="Captações, reuniões, entregas e pagamentos no mesmo calendário. Datas de projetos e recebimentos entram sozinhas.">
         <button className="btn btn-mint" onClick={() => setForm({ kind: "reuniao", starts_at: td + "T10:00" })}><I.plus className="w-4 h-4" />Novo compromisso</button>
       </PageHead>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">

@@ -32,7 +32,7 @@ export default function Agentes() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title={`${AGENTS.length} agentes`} desc="Um time de especialistas de IA, cada um numa área da produção de conteúdo. Escolha o agente, dê o contexto e use o resultado." />
+      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Agentes" desc="Um time de especialistas de IA, cada um numa área da produção de conteúdo. Escolha o agente, dê o contexto e use o resultado." />
       <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-7 gap-2 mb-6">
         {AGENTS.map((a, i) => (
           <button key={a.id} onClick={() => { setSel(a.id); setSaved(false); }} className={`rounded-xl border p-3 text-left transition-colors rise ${sel === a.id ? "border-mint bg-mint/10" : "border-line bg-panel hover:border-slate"}`} style={{ animationDelay: `${i * 0.03}s` }}>

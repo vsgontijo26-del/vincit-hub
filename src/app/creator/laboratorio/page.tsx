@@ -143,7 +143,7 @@ export default function Laboratorio() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Laboratório" desc="Ferramentas instantâneas para testar gancho, tempo de roteiro, legenda e 'cara de IA' antes de postar. Rodam no navegador, sem gastar IA." />
+      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Laboratório" desc="Ferramentas instantâneas para testar gancho, tempo de roteiro, legenda e 'cara de IA' antes de postar. Rodam no navegador, sem gastar IA." />
       <div className="flex gap-1 border-b border-line mb-6 overflow-x-auto">{TABS.map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>
 
       {tab === "gancho" && (

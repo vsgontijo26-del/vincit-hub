@@ -59,7 +59,7 @@ export default function Automacoes() {
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Automações" desc="Quando alguém comentar ou mandar a palavra-chave, o perfil responde no post e envia o direct automaticamente.">
+      <PageHead kicker="CREATOR · 04 EXECUÇÃO" title="Automações" desc="Quando alguém comentar ou mandar a palavra-chave, o perfil responde no post e envia o direct automaticamente.">
         <button className="btn btn-mint" onClick={() => setForm({ ...empty, account_id: connected[0]?.id || accounts[0]?.id || "" })} disabled={!accounts.length}><I.plus className="w-4 h-4" />Nova automação</button>
       </PageHead>
 

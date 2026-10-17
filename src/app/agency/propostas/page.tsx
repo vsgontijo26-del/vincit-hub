@@ -41,7 +41,7 @@ export default function Propostas() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Propostas & orçamentos" desc="Monte o orçamento com a calculadora, gere o texto com IA e envie um link para o cliente aceitar online.">
+      <PageHead kicker="AGENCY · 03 COMERCIAL" title="Propostas & orçamentos" desc="Monte o orçamento com a calculadora, gere o texto com IA e envie um link para o cliente aceitar online.">
         <Link href="/agency/config#precos" className="btn btn-ghost">Tabela de preços</Link>
         <button className="btn btn-mint" disabled={busy} onClick={() => create()}><I.plus className="w-4 h-4" />Nova proposta</button>
       </PageHead>
