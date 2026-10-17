@@ -8,12 +8,13 @@ import AccountSelect from "@/components/AccountSelect";
 import Markdown from "@/components/Markdown";
 import CopyButton from "@/components/CopyButton";
 import { I } from "@/components/icons";
+import { FORMATS } from "@/lib/formats";
 
 export default function CopyPage() {
   const { accounts } = useAccounts();
   const [accountId, setAccountId] = useState("");
   const [refs, setRefs] = useState<any[]>([]);
-  const [f, setF] = useState({ topic: "", format: "Reels", goal: "Engajamento", tone: "Direto e confiante", keyword: "", refId: "" });
+  const [f, setF] = useState({ topic: "", format: "Reels", goal: "Engajamento", tone: "Direto e confiante", keyword: "", refId: "", card: "" });
   const [out, setOut] = useState("");
   const [saved, setSaved] = useState(false);
   const ai = useAI();
@@ -22,13 +23,15 @@ export default function CopyPage() {
     createClient().from("references_lib").select("id,title,analysis").order("created_at", { ascending: false }).then(({ data }) => setRefs(data || []));
     const r = new URLSearchParams(location.search).get("ref");
     if (r) setF((x) => ({ ...x, refId: r }));
+    const c = new URLSearchParams(location.search).get("carta");
+    if (c) setF((x) => ({ ...x, card: c }));
   }, []);
 
   async function go(e: React.FormEvent) {
     e.preventDefault(); setSaved(false);
     const ref = refs.find((r) => r.id === f.refId);
     const reference = ref ? `Gancho: ${ref.analysis?.gancho}\nEstrutura: ${(ref.analysis?.estrutura || []).join(" > ")}\nModelo: ${ref.analysis?.modelo_de_copy}` : "";
-    const r = await ai.run<{ text: string }>("copy", { ...f, reference, account: accounts.find((a) => a.id === accountId) });
+    const r = await ai.run<{ text: string }>("copy", { ...f, reference, format_card: FORMATS.find((x) => x.id === f.card)?.name, account: accounts.find((a) => a.id === accountId) });
     if (r) setOut(r.text);
   }
   async function save() {
@@ -53,6 +56,8 @@ export default function CopyPage() {
           <div><label className="label">Palavra-chave de automação (opcional)</label><input className="input" value={f.keyword} onChange={(e) => setF({ ...f, keyword: e.target.value })} placeholder="ROTEIRO" /></div>
           <div><label className="label">Usar estrutura de referência</label>
             <select className="input" value={f.refId} onChange={(e) => setF({ ...f, refId: e.target.value })}><option value="">Nenhuma</option>{refs.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}</select></div>
+          <div><label className="label">Formato criativo (carta)</label>
+            <select className="input" value={f.card} onChange={(e) => setF({ ...f, card: e.target.value })}><option value="">Deixar a IA escolher</option>{FORMATS.map((x) => <option key={x.id} value={x.id}>{x.n}. {x.name}</option>)}</select></div>
           <button disabled={ai.busy} className="btn btn-mint w-full"><I.pen className="w-4 h-4" />{ai.busy ? "Escrevendo…" : "Gerar copy"}</button>
           {ai.error && <p className="text-danger text-sm">{ai.error}</p>}
         </form>

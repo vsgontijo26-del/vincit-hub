@@ -8,7 +8,9 @@ import { I } from "./icons";
 const items = [
   { href: "/creator", label: "Visão geral", Icon: I.grid },
   { href: "/creator/perfis", label: "Perfis & métricas", Icon: I.user },
-  { href: "/creator/agentes", label: "9 agentes", Icon: I.spark },
+  { href: "/creator/agentes", label: "13 agentes", Icon: I.spark },
+  { href: "/creator/formatos", label: "Formatos criativos", Icon: I.cards },
+  { href: "/creator/laboratorio", label: "Laboratório", Icon: I.flask },
   { href: "/creator/automacoes", label: "Automações", Icon: I.bolt },
   { href: "/creator/tendencias", label: "Tendências", Icon: I.trend },
   { href: "/creator/referencias", label: "Referências", Icon: I.bookmark },

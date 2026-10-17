@@ -7,7 +7,7 @@ const hubs = [
   {
     key: "creator", name: "CREATOR", href: "/creator", status: "Ativo",
     desc: "Analista de Instagram: perfis, automações por comentário e DM, tendências, referências e copy.",
-    items: ["9 agentes de IA", "Perfis & métricas", "Automações", "Tendências", "Referências", "Copy", "Pauta"],
+    items: ["13 agentes de IA", "Formatos criativos", "Laboratório", "Perfis & métricas", "Automações", "Tendências", "Referências", "Copy", "Pauta"],
     Icon: I.camera,
   },
   {

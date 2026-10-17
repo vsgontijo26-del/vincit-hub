@@ -20,4 +20,6 @@ export const I = {
   copy: (p: P) => (<svg {...base} className={p.className}><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>),
   logout: (p: P) => (<svg {...base} className={p.className}><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>),
   menu: (p: P) => (<svg {...base} className={p.className}><path d="M4 7h16M4 12h16M4 17h16"/></svg>),
+  cards: (p: P) => (<svg {...base} className={p.className}><rect x="3" y="6" width="12" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>),
+  flask: (p: P) => (<svg {...base} className={p.className}><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3M7 15h10"/></svg>),
 };
