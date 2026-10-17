@@ -24,7 +24,7 @@ export default async function AgencyHome() {
   ]);
 
   const T = tx || [];
-  const month = T.filter((t) => t.due_date >= monthStart);
+  const month = T.filter((t) => t.due_date.startsWith(today.slice(0, 7)));
   const faturado = month.filter((t) => t.kind === "entrada" && t.paid).reduce((a, t) => a + Number(t.amount), 0);
   const aReceber = T.filter((t) => t.kind === "entrada" && !t.paid).reduce((a, t) => a + Number(t.amount), 0);
   const atrasado = T.filter((t) => t.kind === "entrada" && !t.paid && t.due_date < today).reduce((a, t) => a + Number(t.amount), 0);
