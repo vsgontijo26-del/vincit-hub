@@ -100,7 +100,7 @@ export default function Referencias() {
                     <div><p className="label text-mint">Adaptações para você</p><ul className="list-disc ml-5 space-y-1">{(a.adaptacoes || []).map((s: string, i: number) => <li key={i}>{s}</li>)}</ul></div>
                     <div className="flex flex-wrap gap-2">
                       <button onClick={() => toIdeas(r)} className="btn btn-ghost btn-sm">Enviar adaptações à pauta</button>
-                      <Link href={`/creator/copy?ref=${r.id}`} className="btn btn-ghost btn-sm">Escrever copy com essa estrutura</Link>
+                      <Link href={`/creator/laboratorio?tab=criar&ref=${r.id}`} className="btn btn-ghost btn-sm">Escrever copy com essa estrutura</Link>
                       {r.url && <a href={r.url} target="_blank" className="btn btn-ghost btn-sm"><I.link className="w-3.5 h-3.5" />Abrir</a>}
                       <button onClick={() => del(r.id)} className="btn btn-ghost btn-sm"><I.trash className="w-3.5 h-3.5" /></button>
                     </div>

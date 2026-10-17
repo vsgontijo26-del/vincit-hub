@@ -10,8 +10,6 @@ const items = [
   { href: "/creator/tendencias", label: "Tendências", Icon: I.trend, group: "02 · Análise" },
   { href: "/creator/referencias", label: "Referências", Icon: I.bookmark, group: "02 · Análise" },
   { href: "/creator/formatos", label: "Formatos criativos", Icon: I.cards, group: "03 · Criação" },
-  { href: "/creator/copy", label: "Copy & roteiro", Icon: I.pen, group: "03 · Criação" },
-  { href: "/creator/agentes", label: "Agentes", Icon: I.spark, group: "03 · Criação" },
   { href: "/creator/laboratorio", label: "Laboratório", Icon: I.flask, group: "03 · Criação" },
   { href: "/creator/pauta", label: "Planejador", Icon: I.calendar, group: "04 · Execução" },
   { href: "/creator/automacoes", label: "Automações", Icon: I.bolt, group: "04 · Execução" },

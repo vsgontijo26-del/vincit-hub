@@ -107,7 +107,7 @@ export default function Formatos() {
               <div><label className="label">Objetivo</label><select className="input" value={f.goal} onChange={(e) => setF({ ...f, goal: e.target.value })}>{["Alcance e conexão", "Autoridade", "Gerar leads", "Venda", "Comunidade"].map((x) => <option key={x}>{x}</option>)}</select></div>
               <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={f.accountId} onChange={(v) => setF({ ...f, accountId: v })} /></div>
               <div className="md:col-span-2 flex flex-wrap gap-2 justify-end">
-                <Link href={`/creator/copy?carta=${sel.id}`} className="btn btn-ghost btn-sm">Abrir no Copy & roteiro</Link>
+                <Link href={`/creator/laboratorio?tab=criar&carta=${sel.id}`} className="btn btn-ghost btn-sm">Abrir no Laboratório</Link>
                 <button disabled={ai.busy} className="btn btn-mint btn-sm"><I.spark className="w-4 h-4" />{ai.busy ? "Criando…" : "Gerar roteiro com a carta"}</button>
               </div>
               {ai.error && <p className="md:col-span-2 text-danger text-sm">{ai.error}</p>}
