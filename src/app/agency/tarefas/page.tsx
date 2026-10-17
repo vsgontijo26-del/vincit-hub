@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { dtShort, today } from "@/lib/agency";
 import PageHead from "@/components/PageHead";
 import { I } from "@/components/icons";
-import { PRIORITIES, STATUS_TYPES, Flag } from "@/components/tasks/shared";
+import { PRIORITIES, STATUS_TYPES, Flag, Recur, recurLabel } from "@/components/tasks/shared";
 import SpaceSettings from "@/components/tasks/SpaceSettings";
 import TaskDrawer from "@/components/tasks/TaskDrawer";
 
@@ -16,7 +16,8 @@ type Group = { key: string; name: string; color: string; type: string; items: an
 export default function Tarefas() {
   const [d, setD] = useState<{ spaces: any[]; statuses: any[]; lists: any[]; tags: any[]; tasks: any[]; team: any[]; projects: any[] }>({ spaces: [], statuses: [], lists: [], tags: [], tasks: [], team: [], projects: [] });
   const [loading, setLoading] = useState(true);
-  const [sel, setSel] = useState<{ space?: string; list?: string }>({});
+  const [sel, setSel] = useState<{ space?: string; list?: string; inbox?: boolean }>({});
+  const [draft, setDraft] = useState("");
   const [view, setView] = useState<"lista" | "quadro">("lista");
   const [q, setQ] = useState("");
   const [who, setWho] = useState("");
@@ -55,7 +56,7 @@ export default function Tarefas() {
   useEffect(() => { ls.set("vh.tasks.view", view); }, [view]);
   useEffect(() => { ls.set("vh.tasks.sel", JSON.stringify(sel)); }, [sel]);
   // seleção apontando para espaço excluído
-  useEffect(() => { if (!loading && sel.space && !d.spaces.some((x) => x.id === sel.space)) setSel({}); }, [loading, d.spaces, sel.space]);
+  useEffect(() => { if (!loading && sel.space && !sel.inbox && !d.spaces.some((x) => x.id === sel.space)) setSel({}); }, [loading, d.spaces, sel.space]);
   useEffect(() => { if (open) setOpen(d.tasks.find((x) => x.id === open.id) || null); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [d.tasks]);
 
   const space = d.spaces.find((x) => x.id === sel.space);
@@ -68,7 +69,7 @@ export default function Tarefas() {
     return m;
   }, [d.tasks]);
 
-  const visible = d.tasks.filter((x) => !x.parent_id
+  const visible = d.tasks.filter((x) => !x.parent_id && !x.inbox
     && (!sel.space || x.space_id === sel.space)
     && (!sel.list || x.list_id === sel.list)
     && (!who || x.assignee === who)
@@ -107,6 +108,19 @@ export default function Tarefas() {
     setD((p) => ({ ...p, tasks: p.tasks.map((x) => (x.id === t.id ? { ...x, done: !t.done } : x)) }));
     await createClient().from("ag_tasks").update({ done: !t.done }).eq("id", t.id); load();
   }
+  async function capture(e: React.FormEvent) {
+    e.preventDefault(); const title = draft.trim(); if (!title) return;
+    setDraft("");
+    await createClient().from("ag_tasks").insert({ title, inbox: true, priority: null }); load();
+  }
+  async function promote(t: any, spaceId: string) {
+    if (!spaceId) return;
+    await createClient().from("ag_tasks").update({ inbox: false, space_id: spaceId, list_id: null, status_id: stOf(spaceId)[0]?.id }).eq("id", t.id); load();
+  }
+  async function discard(t: any) {
+    setD((p) => ({ ...p, tasks: p.tasks.filter((x) => x.id !== t.id) }));
+    await createClient().from("ag_tasks").delete().eq("id", t.id); load();
+  }
   async function newTask() {
     const spaceId = sel.space || d.spaces[0]?.id; if (!spaceId) return;
     const { data } = await createClient().from("ag_tasks").insert({ title: "Nova tarefa", space_id: spaceId, list_id: sel.list || null, status_id: stOf(spaceId)[0]?.id, priority: null }).select().single();
@@ -123,8 +137,12 @@ export default function Tarefas() {
 
   const sidebar = (
     <nav className="space-y-0.5 text-sm">
-      <button onClick={() => { setSel({}); setNavOpen(false); }} className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg ${!sel.space ? "bg-mint/10 text-mint" : "hover:bg-panel2"}`}>
-        <I.grid className="w-4 h-4" /> <span className="flex-1 text-left">Todas as tarefas</span><span className="text-xs text-fog">{d.tasks.filter((x) => !x.parent_id && !x.done).length}</span>
+      <button onClick={() => { setSel({}); setNavOpen(false); }} className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg ${!sel.space && !sel.inbox ? "bg-mint/10 text-mint" : "hover:bg-panel2"}`}>
+        <I.grid className="w-4 h-4" /> <span className="flex-1 text-left">Todas as tarefas</span><span className="text-xs text-fog">{d.tasks.filter((x) => !x.parent_id && !x.done && !x.inbox).length}</span>
+      </button>
+      <button onClick={() => { setSel({ inbox: true }); setNavOpen(false); }} className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg ${sel.inbox ? "bg-mint/10 text-mint" : "hover:bg-panel2"}`}>
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round"><path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 2h6l1-2h5" /></svg>
+        <span className="flex-1 text-left">Inbox</span><span className="text-xs text-fog">{d.tasks.filter((x) => x.inbox && !x.done).length}</span>
       </button>
       <p className="label !mt-4 !mb-1 px-2.5">Espaços</p>
       {d.spaces.map((s) => {
@@ -134,12 +152,12 @@ export default function Tarefas() {
             <div className={`group flex items-center gap-2 px-2.5 py-2 rounded-lg ${active && !sel.list ? "bg-panel2" : "hover:bg-panel2"}`}>
               <span className="w-5 h-5 rounded-md grid place-items-center text-[10px] font-bold text-ink shrink-0" style={{ background: s.color }}>{s.name[0]?.toUpperCase()}</span>
               <button onClick={() => { setSel({ space: s.id }); setNavOpen(false); }} className="flex-1 text-left truncate">{s.name}</button>
-              <span className="text-xs text-fog group-hover:hidden">{d.tasks.filter((x) => !x.parent_id && !x.done && x.space_id === s.id).length}</span>
+              <span className="text-xs text-fog group-hover:hidden">{d.tasks.filter((x) => !x.parent_id && !x.done && !x.inbox && x.space_id === s.id).length}</span>
               <button onClick={() => setCfg({ open: true, space: s })} className="hidden group-hover:block text-fog hover:text-mint" title="Configurar espaço">⚙</button>
             </div>
             {active && d.lists.filter((l) => l.space_id === s.id).map((l) => (
               <button key={l.id} onClick={() => { setSel({ space: s.id, list: l.id }); setNavOpen(false); }} className={`w-full flex items-center gap-2 pl-9 pr-2.5 py-1.5 rounded-lg text-[13px] ${sel.list === l.id ? "bg-panel2 text-paper" : "text-fog hover:bg-panel2"}`}>
-                <span className="flex-1 text-left truncate">{l.name}</span><span className="text-xs">{d.tasks.filter((x) => !x.parent_id && !x.done && x.list_id === l.id).length}</span>
+                <span className="flex-1 text-left truncate">{l.name}</span><span className="text-xs">{d.tasks.filter((x) => !x.parent_id && !x.done && !x.inbox && x.list_id === l.id).length}</span>
               </button>
             ))}
           </div>
@@ -149,7 +167,7 @@ export default function Tarefas() {
     </nav>
   );
 
-  const crumb = space ? `${space.name}${sel.list ? " / " + (d.lists.find((l) => l.id === sel.list)?.name || "") : ""}` : "Todas as tarefas";
+  const crumb = sel.inbox ? "Inbox" : space ? `${space.name}${sel.list ? " / " + (d.lists.find((l) => l.id === sel.list)?.name || "") : ""}` : "Todas as tarefas";
 
   return (
     <>
@@ -164,10 +182,31 @@ export default function Tarefas() {
             {space && <span className="w-3 h-3 rounded-sm" style={{ background: space.color }} />}
             <h2 className="font-display font-bold text-lg mr-auto truncate">{crumb}</h2>
             {space && <button onClick={() => setCfg({ open: true, space })} className="btn btn-ghost btn-sm">⚙ Etapas, listas e tags</button>}
-            <button onClick={newTask} className="btn btn-mint btn-sm"><I.plus className="w-4 h-4" /> Tarefa</button>
+            {!sel.inbox && <button onClick={newTask} className="btn btn-mint btn-sm"><I.plus className="w-4 h-4" /> Tarefa</button>}
           </div>
           {navOpen && <div className="lg:hidden card p-2 mb-3">{sidebar}</div>}
 
+          {sel.inbox ? (
+            <div className="max-w-3xl">
+              <p className="text-sm text-fog mb-3">Rascunhos rápidos de ideias, sem espaço, etapa ou tag. Quando a ideia amadurecer, mande para um espaço.</p>
+              <form onSubmit={capture} className="card p-2 mb-4 flex gap-2">
+                <input autoFocus className="flex-1 bg-transparent px-3 py-2.5 outline-none placeholder:text-fog/70" placeholder="Anote uma ideia e aperte Enter…" value={draft} onChange={(e) => setDraft(e.target.value)} />
+                <button className="btn btn-mint btn-sm"><I.plus className="w-4 h-4" /></button>
+              </form>
+              <ul className="space-y-1.5">
+                {d.tasks.filter((x) => x.inbox && !x.done && !x.parent_id).sort((a, b) => (b.created_at || "").localeCompare(a.created_at || "")).map((t) => (
+                  <li key={t.id} className="group flex items-center gap-3 bg-panel border border-line rounded-xl px-3 py-2.5 hover:border-slate">
+                    <span className="w-1.5 h-1.5 rounded-full bg-mint/70 shrink-0" />
+                    <button onClick={() => setOpen(t)} className="flex-1 text-left text-sm min-w-0"><span className="block truncate">{t.title}</span>{t.description && <span className="block text-xs text-fog truncate">{t.description}</span>}</button>
+                    <span className="text-[10px] text-fog hidden sm:block whitespace-nowrap">{new Date(t.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}</span>
+                    <select className="input !py-1 !w-auto text-xs" value="" onChange={(e) => promote(t, e.target.value)} title="Mover para um espaço"><option value="">→ Espaço</option>{d.spaces.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+                    <button onClick={() => discard(t)} className="text-fog hover:text-danger" title="Descartar"><I.trash className="w-3.5 h-3.5" /></button>
+                  </li>
+                ))}
+                {!d.tasks.some((x) => x.inbox && !x.done) && <p className="text-fog text-sm text-center py-10">Inbox vazio. Jogue aqui qualquer ideia solta.</p>}
+              </ul>
+            </div>
+          ) : (<>
           <div className="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-line">
             <div className="flex bg-panel2 rounded-lg p-0.5">
               {(["lista", "quadro"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1 text-sm rounded-md capitalize ${view === v ? "bg-ink text-mint" : "text-fog"}`}>{v === "lista" ? "☰ Lista" : "▦ Quadro"}</button>)}
@@ -199,6 +238,7 @@ export default function Tarefas() {
                             <span className={`text-sm truncate ${t.done ? "line-through text-fog" : ""}`}>{t.title}</span>
                             {subCount[t.id] && <span className="text-[10px] text-fog whitespace-nowrap">⑂ {subCount[t.id][0]}/{subCount[t.id][1]}</span>}
                             {t.description && <span className="text-fog text-[10px]">≡</span>}
+                            {t.recurrence && <span className="text-fog" title={recurLabel(t.recurrence)}><Recur /></span>}
                             <div className="hidden sm:flex gap-1 overflow-hidden"><Tags ids={t.tags} /></div>
                             {!space && statusById[t.status_id] && <span className="hidden xl:inline text-[10px]" style={{ color: statusById[t.status_id].color }}>{statusById[t.status_id].name}</span>}
                           </div>
@@ -233,6 +273,7 @@ export default function Tarefas() {
                         <div className="flex items-center gap-2 mt-2">
                           <Avatar n={t.assignee} />
                           <Due t={t} />
+                          {t.recurrence && <span className="text-fog" title={recurLabel(t.recurrence)}><Recur /></span>}
                           {subCount[t.id] && <span className="text-[10px] text-fog">⑂ {subCount[t.id][0]}/{subCount[t.id][1]}</span>}
                           <span className="ml-auto"><Flag p={t.priority} /></span>
                         </div>
@@ -246,6 +287,7 @@ export default function Tarefas() {
               ))}
             </div>
           )}
+          </>)}
         </section>
       </div>
 

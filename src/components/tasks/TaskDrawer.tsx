@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { I } from "@/components/icons";
-import { PRIORITIES, Flag } from "./shared";
+import { PRIORITIES, Flag, RECUR } from "./shared";
 
 type Props = {
   task: any | null; onClose: () => void; onChanged: () => void;
@@ -29,7 +29,7 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
   }
   async function moveSpace(space_id: string) {
     const first = statuses.filter((x) => x.space_id === space_id).sort((a, b) => a.position - b.position)[0];
-    await upd({ space_id, list_id: null, status_id: first?.id || null, tags: (t.tags || []).filter((id: string) => { const g = tags.find((x) => x.id === id); return g && (!g.space_id || g.space_id === space_id); }) });
+    await upd({ space_id, inbox: false, list_id: null, status_id: first?.id || null, tags: (t.tags || []).filter((id: string) => { const g = tags.find((x) => x.id === id); return g && (!g.space_id || g.space_id === space_id); }) });
   }
   async function addSub(e: React.FormEvent) {
     e.preventDefault(); if (!sub.trim()) return;
@@ -96,6 +96,14 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
                 <input type="date" className="input !py-1.5" value={t.due_date || ""} onChange={(e) => upd({ due_date: e.target.value || null })} title="Prazo" />
               </div>
             </Row>
+            <Row label="Repetir">
+              <div className="flex items-center gap-2">
+                <select className="input !py-1.5" value={t.recurrence || ""} onChange={(e) => upd({ recurrence: e.target.value || null, recur_spawned: false })}>{RECUR.map((r) => <option key={r.k} value={r.k}>{r.l}</option>)}</select>
+                {t.recurrence && <input type="date" className="input !py-1.5" title="Repetir até" value={t.recurrence_until || ""} onChange={(e) => upd({ recurrence_until: e.target.value || null })} />}
+              </div>
+              {t.recurrence && <p className="text-[11px] text-fog mt-1">Ao concluir, a próxima tarefa é criada sozinha{t.due_date ? "" : " (defina um prazo)"}.{t.recurrence_until ? "" : " Sem data final."}</p>}
+            </Row>
+            {t.event_id && <Row label="Agenda"><Link href="/agency/agenda" className="text-sm text-mint hover:underline">Compromisso vinculado ↗</Link></Row>}
             <Row label="Prioridade">
               <div className="flex flex-wrap gap-1">
                 {PRIORITIES.map((p) => (
