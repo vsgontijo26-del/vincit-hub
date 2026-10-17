@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAccounts } from "@/lib/useAccounts";
 import { useAI } from "@/lib/useAI";
-import { FORMATS, CATS, type Cat, type Format } from "@/lib/formats";
+import { FORMATS, CATS, REFS, TRELLO, refLabel, type Cat, type Format } from "@/lib/formats";
 import PageHead from "@/components/PageHead";
 import AccountSelect from "@/components/AccountSelect";
 import Markdown from "@/components/Markdown";
@@ -95,6 +95,10 @@ export default function Formatos() {
             </div>
             {!!sel.combo?.length && <div><p className="label">Combina com</p><div className="flex flex-wrap gap-1.5">{sel.combo.map((n) => { const c = FORMATS.find((x) => x.n === n)!; return <button key={n} onClick={() => open(c)} className="chip hover:text-mint">{n}. {c.name}</button>; })}</div></div>}
 
+            <div><p className="label">Referências</p><div className="flex flex-wrap gap-1.5">
+              {(REFS[sel.n] || []).map((u, i) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="chip hover:text-mint"><I.link className="w-3 h-3" />{refLabel(u)} {i + 1}</a>)}
+              {TRELLO[sel.n] && <a href={TRELLO[sel.n]} target="_blank" rel="noopener noreferrer" className="chip hover:text-mint"><I.link className="w-3 h-3" />Carta original no Trello</a>}
+            </div></div>
             <form onSubmit={apply} className="bg-panel2 rounded-xl p-4 grid md:grid-cols-2 gap-3">
               <p className="md:col-span-2 font-display font-bold">Aplicar ao meu tema</p>
               <div className="md:col-span-2"><label className="label">Tema</label><input required className="input" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} placeholder="Ex.: por que vídeo institucional não precisa ser chato" /></div>

@@ -144,3 +144,22 @@ export const FORMATS: Format[] = [
 ];
 
 export const formatBrief = () => FORMATS.map((f) => `${f.n}. ${f.name} (${CATS[f.cat].l}): ${f.essence}`).join("\n");
+
+/** Exemplos citados em cada carta do quadro original (links públicos) */
+export const REFS: Record<number, string[]> = {
+  1: ["https://www.instagram.com/p/Cx30Ny5PWeo/"],
+  2: ["https://www.instagram.com/reel/Cx5jNZsrzIq/"],
+  3: ["https://vm.tiktok.com/ZMjmYNgqK/", "https://www.instagram.com/reel/Cv8LatpuS9S/", "https://vm.tiktok.com/ZMjmY2Acr/", "https://www.instagram.com/reel/CrmGAy6Lb4R/", "https://www.instagram.com/reel/Ctoem_ssY_n/", "https://www.instagram.com/reel/CuxU1jBpo-F/", "https://www.instagram.com/p/Cx8I4zerR1a/"],
+  4: ["https://www.instagram.com/p/Cx-wH5fLLYd/"],
+  5: ["https://www.instagram.com/p/CyBRSw5rwDk/"],
+  7: ["https://www.instagram.com/p/CyGcZQfrrsa/"],
+  8: ["https://www.instagram.com/p/CyJCmVKreNn/"],
+  9: ["https://www.instagram.com/reel/CyLkVZLrVMJ/"],
+  11: ["https://www.instagram.com/reel/CyQ1t92riuV/"],
+  12: ["https://www.instagram.com/reel/CyTWxxGriEL/"],
+  14: ["https://www.instagram.com/reel/CyYnaSWrKp9/"],
+};
+/** Carta original no Trello do desafio */
+export const TRELLO: Record<number, string> = {"1":"https://trello.com/c/a44YEPc9","2":"https://trello.com/c/EAMHByEJ","3":"https://trello.com/c/9Uuo3Ze2","4":"https://trello.com/c/jWjIXgvR","5":"https://trello.com/c/e6NDwkk7","6":"https://trello.com/c/P8FKSJBa","7":"https://trello.com/c/GK2kC5hl","8":"https://trello.com/c/MBx9wn66","9":"https://trello.com/c/apzrxW86","10":"https://trello.com/c/zOXF8lgX","11":"https://trello.com/c/YtIw9oV4","12":"https://trello.com/c/mKvmPmcP","13":"https://trello.com/c/owSVjeJ3","14":"https://trello.com/c/fpfCPql0","15":"https://trello.com/c/Coj3IbyI","16":"https://trello.com/c/NvO30v6z","17":"https://trello.com/c/RUXfbNjC","18":"https://trello.com/c/NSHwAw58","19":"https://trello.com/c/qKODAcxz","20":"https://trello.com/c/j5IfdZBT","21":"https://trello.com/c/QpPiS4Qe","22":"https://trello.com/c/TFxTdqKP","23":"https://trello.com/c/krwbVTFf","24":"https://trello.com/c/1FYfqHsN","25":"https://trello.com/c/1cDzSDoH","26":"https://trello.com/c/cfzNsVOh","27":"https://trello.com/c/suVc5mPd","28":"https://trello.com/c/I6GS8WQe","29":"https://trello.com/c/17dXisoL","30":"https://trello.com/c/AEZ0utId","31":"https://trello.com/c/gDxzJlMv","32":"https://trello.com/c/BD1eymth"} as any;
+export const BOARD_URL = "https://trello.com/b/aI0YKseX/desafio-formato-criativo-32-dias";
+export const refLabel = (u: string) => (u.includes("tiktok") ? "TikTok" : u.includes("/reel/") ? "Reel" : "Post");
