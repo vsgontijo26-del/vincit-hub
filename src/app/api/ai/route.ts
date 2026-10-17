@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callClaude, extractJson } from "@/lib/ai";
+import { AGENTS } from "@/lib/agents";
 
 export const maxDuration = 300;
 
@@ -51,6 +52,26 @@ export async function POST(req: Request) {
       const text = await callClaude({
         maxTokens: 1200,
         prompt: `${ctx}\nCrie as mensagens de uma automação de Instagram. Quando alguém comentar "${data.keyword}" no post, o perfil responde publicamente e envia uma DM.\nO que será entregue: ${data.offer}\n${data.link ? `Link: ${data.link}` : ""}\nResponda SOMENTE com JSON: {"public_reply":"resposta curta e variada para o comentário, até 80 caracteres, sem link","dm_message":"mensagem de direct calorosa, até 500 caracteres, que entrega o prometido${data.link ? " e menciona que o link segue abaixo" : ""}"}`,
+      });
+      return NextResponse.json(extractJson(text));
+    }
+
+    if (task === "agent") {
+      const ag = AGENTS.find((a) => a.id === data.agent);
+      if (!ag) return NextResponse.json({ error: "Agente desconhecido" }, { status: 400 });
+      const text = await callClaude({
+        webSearch: !!ag.web,
+        maxTokens: 5000,
+        prompt: `${ag.prompt}\n\n${ctx}\nData de hoje: ${new Date().toISOString().slice(0, 10)}\n\nPedido:\n"""${data.input || ""}"""\n\nResponda em markdown, pronto para usar.`,
+      });
+      return NextResponse.json({ text });
+    }
+
+    if (task === "proposal_text") {
+      const c = data.client || {};
+      const text = await callClaude({
+        maxTokens: 3000,
+        prompt: `Você escreve propostas comerciais para a VINCIT, produtora audiovisual brasileira. Tom: profissional, próximo e confiante, sem exageros.\nProjeto: ${data.title}\nCliente: ${c.name || "-"}${c.company ? ` (${c.company})` : ""}${c.segment ? ` · segmento ${c.segment}` : ""}\nItens orçados: ${data.items || "-"}\nInvestimento total: ${data.total}\nContexto adicional: ${data.brief || "-"}\n\nResponda SOMENTE com JSON: {"intro":"abertura pessoal de 2-3 frases para o cliente","scope":"escopo em parágrafos curtos ou tópicos com hífen","deliverables":"lista de entregáveis com hífen, específica (duração, formatos, resolução, quantidade de revisões)","timeline":"cronograma por etapas com prazos estimados","payment_terms":"condições de pagamento sugeridas (ex.: 50% na aprovação e 50% na entrega) e forma de pagamento"}`,
       });
       return NextResponse.json(extractJson(text));
     }

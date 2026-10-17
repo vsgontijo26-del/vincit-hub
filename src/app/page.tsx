@@ -7,13 +7,13 @@ const hubs = [
   {
     key: "creator", name: "CREATOR", href: "/creator", status: "Ativo",
     desc: "Analista de Instagram: perfis, automações por comentário e DM, tendências, referências e copy.",
-    items: ["Perfis & métricas", "Automações", "Tendências", "Referências", "Copy", "Pauta"],
+    items: ["9 agentes de IA", "Perfis & métricas", "Automações", "Tendências", "Referências", "Copy", "Pauta"],
     Icon: I.camera,
   },
   {
-    key: "agency", name: "AGENCY", href: "/agency", status: "Em breve",
-    desc: "Estrutura da produtora: propostas, orçamento, financeiro, CRM, tarefas e equipamentos.",
-    items: ["Propostas", "Orçamentos", "Financeiro", "CRM", "Tarefas", "Equipamentos"],
+    key: "agency", name: "AGENCY", href: "/agency", status: "Ativo",
+    desc: "Gestão da produtora: projetos com aprovação do cliente, propostas, orçamento, financeiro, CRM, agenda, tarefas e equipamentos.",
+    items: ["Projetos", "Aprovação", "Propostas", "Financeiro", "CRM", "Agenda", "Equipamentos"],
     Icon: I.briefcase,
   },
 ];
