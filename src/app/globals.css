@@ -38,8 +38,8 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; transition: all .15s; cursor: pointer; white-space: nowrap; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn-mint { background: var(--color-mint); color: #06140e; }
-.btn-mint:hover:not(:disabled) { background: #8ff5c8; }
+.btn-mint { background: var(--color-mint); color: var(--color-on-mint, #06140e); }
+.btn-mint:hover:not(:disabled) { background: var(--color-mint-hover, #8ff5c8); }
 .btn-ghost { border: 1px solid var(--color-line); color: var(--color-paper); background: transparent; }
 .btn-ghost:hover:not(:disabled) { border-color: var(--color-mint); color: var(--color-mint); }
 .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
@@ -47,7 +47,7 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .card { background: var(--color-panel); border: 1px solid var(--color-line); border-radius: 16px; }
 
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--color-line); color: var(--color-fog); }
-.chip-mint { border-color: var(--color-mint-dim); color: var(--color-mint); background: rgba(110,239,182,.07); }
+.chip-mint { border-color: var(--color-mint-dim); color: var(--color-mint); background: color-mix(in srgb, var(--color-mint) 7%, transparent); }
 
 .md h1, .md h2, .md h3 { font-family: var(--font-display); font-weight: 700; margin: 1.1em 0 .4em; color: var(--color-paper); }
 .md h1 { font-size: 20px; } .md h2 { font-size: 17px; } .md h3 { font-size: 15px; color: var(--color-mint); }

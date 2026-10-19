@@ -118,7 +118,7 @@ export default function Clientes() {
             <ul className="space-y-1.5">
               {ob.map((s: any, i: number) => (
                 <li key={i}><label className="flex items-center gap-3 bg-panel2 rounded-lg px-3 py-2 text-sm cursor-pointer">
-                  <input type="checkbox" checked={s.done} onChange={() => toggleStep(i)} className="accent-[#6eefb6] w-4 h-4" /><span className={s.done ? "line-through text-fog" : ""}>{s.label}</span></label></li>
+                  <input type="checkbox" checked={s.done} onChange={() => toggleStep(i)} className="accent-[var(--color-mint)] w-4 h-4" /><span className={s.done ? "line-through text-fog" : ""}>{s.label}</span></label></li>
               ))}
             </ul>
             <form onSubmit={addStep} className="flex gap-2 mt-2"><input className="input" placeholder="Nova etapa…" value={newStep} onChange={(e) => setNewStep(e.target.value)} /><button className="btn btn-ghost"><I.plus className="w-4 h-4" /></button></form>

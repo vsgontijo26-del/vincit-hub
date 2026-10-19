@@ -174,7 +174,7 @@ export default function Revisar() {
           <div className="card p-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div><label className="label">Estrutura</label><select className="input" value={st} onChange={(e) => setSt(e.target.value)}>{Object.entries(STRUCTS).map(([k, v]) => <option key={k} value={k}>{v.l}</option>)}</select></div>
-              <div><label className="label">Duração alvo: {dur}s</label><input type="range" min={7} max={180} step={1} value={dur} onChange={(e) => setDur(+e.target.value)} className="w-full accent-[#6eefb6] mt-3" /></div>
+              <div><label className="label">Duração alvo: {dur}s</label><input type="range" min={7} max={180} step={1} value={dur} onChange={(e) => setDur(+e.target.value)} className="w-full accent-[var(--color-mint)] mt-3" /></div>
             </div>
             <ol className="space-y-1.5">
               {STRUCTS[st].beats.map(([name, pct, tip]) => { const from = acc; acc += (pct / 100) * dur; return (

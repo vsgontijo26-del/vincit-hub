@@ -19,7 +19,7 @@ export default function Fields({ fields, value, onChange }: { fields: Field[]; v
                 {opts.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
               </select>
             ) : f.type === "checkbox" ? (
-              <label className="flex items-center gap-2 text-sm mt-6"><input type="checkbox" checked={!!v} onChange={(e) => set(f.key, e.target.checked)} className="accent-[#6eefb6] w-4 h-4" />{f.label}</label>
+              <label className="flex items-center gap-2 text-sm mt-6"><input type="checkbox" checked={!!v} onChange={(e) => set(f.key, e.target.checked)} className="accent-[var(--color-mint)] w-4 h-4" />{f.label}</label>
             ) : (
               <input className="input" required={f.required} placeholder={f.placeholder}
                 type={f.type === "money" || f.type === "number" ? "number" : f.type === "datetime" ? "datetime-local" : f.type || "text"}

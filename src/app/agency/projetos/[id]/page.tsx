@@ -152,7 +152,7 @@ export default function Projeto() {
             <ul className="space-y-1.5 mb-3">
               {tasks.map((t) => (
                 <li key={t.id} className="flex items-center gap-3 bg-panel2 rounded-lg px-3 py-2">
-                  <input type="checkbox" checked={t.done} onChange={() => toggleTask(t)} className="accent-[#6eefb6] w-4 h-4" />
+                  <input type="checkbox" checked={t.done} onChange={() => toggleTask(t)} className="accent-[var(--color-mint)] w-4 h-4" />
                   <span className={`flex-1 text-sm ${t.done ? "line-through text-fog" : ""}`}>{t.title}</span>
                   {t.assignee && <span className="chip">{t.assignee}</span>}
                   {t.due_date && <span className={`text-xs ${!t.done && t.due_date < today() ? "text-danger" : "text-fog"}`}>{dtShort(t.due_date)}</span>}

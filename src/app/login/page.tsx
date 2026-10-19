@@ -151,7 +151,7 @@ export default function Login() {
               <PasswordInput value={password2} onChange={setPassword2} placeholder="Repita a senha" autoComplete="new-password" />
               {password2 && !matchOk && <Hint ok={false} text="As senhas não conferem" />}
               <label className="flex items-start gap-2.5 mt-5 text-sm text-fog cursor-pointer">
-                <input type="checkbox" className="accent-[#6eefb6] mt-0.5" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
+                <input type="checkbox" className="accent-[var(--color-mint)] mt-0.5" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
                 <span>Li e aceito os termos de uso e a <Link href="/privacidade" target="_blank" className="text-mint hover:underline">política de privacidade</Link>. Meu CPF é usado só para identificar minha conta.</span>
               </label>
             </div>

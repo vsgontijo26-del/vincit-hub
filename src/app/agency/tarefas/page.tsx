@@ -215,7 +215,7 @@ export default function Tarefas() {
             <select className="input !py-1.5 !w-auto" value={who} onChange={(e) => setWho(e.target.value)}><option value="">Responsável</option>{d.team.map((m) => <option key={m.id}>{m.name}</option>)}</select>
             <select className="input !py-1.5 !w-auto" value={tag} onChange={(e) => setTag(e.target.value)}><option value="">Tag</option>{d.tags.filter((g) => !space || !g.space_id || g.space_id === space.id).map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}</select>
             <select className="input !py-1.5 !w-auto" value={pri} onChange={(e) => setPri(e.target.value)}><option value="">Prioridade</option>{PRIORITIES.map((p) => <option key={p.k} value={p.k}>{p.l}</option>)}</select>
-            <label className="flex items-center gap-1.5 text-sm text-fog ml-auto cursor-pointer"><input type="checkbox" className="accent-[#6eefb6]" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> Concluídas{hiddenDone ? ` (${hiddenDone})` : ""}</label>
+            <label className="flex items-center gap-1.5 text-sm text-fog ml-auto cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)]" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> Concluídas{hiddenDone ? ` (${hiddenDone})` : ""}</label>
           </div>
 
           {loading ? <p className="text-fog text-sm py-10 text-center">Carregando…</p> : view === "lista" ? (

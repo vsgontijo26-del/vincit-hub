@@ -35,7 +35,7 @@ function ToolPicker({ value, onChange }: { value: string[]; onChange: (v: string
               {ts.length > 1 && <button type="button" onClick={() => onChange(all ? value.filter((k) => !ts.some((t) => t.key === k)) : Array.from(new Set([...value, ...ts.map((t) => t.key)])))} className="text-[11px] text-fog hover:text-mint">{all ? "Nenhuma" : "Todas"}</button>}
             </div>
             <div className="space-y-1">{ts.map((t) => (
-              <label key={t.key} className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" className="accent-[#6eefb6]" checked={value.includes(t.key)} onChange={() => toggle(t.key)} />{t.label}</label>
+              <label key={t.key} className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)]" checked={value.includes(t.key)} onChange={() => toggle(t.key)} />{t.label}</label>
             ))}</div>
           </div>
         );
@@ -248,7 +248,7 @@ export default function Admin() {
             <div><label className="label">Observações</label><input className="input" value={editU.notes || ""} onChange={(e) => setEditU({ ...editU, notes: e.target.value })} placeholder="Forma de pagamento, combinado…" /></div>
           </div>
           <div className="bg-panel2 rounded-xl p-4">
-            <label className="flex items-center gap-2 text-sm mb-3 cursor-pointer"><input type="checkbox" className="accent-[#6eefb6]" checked={!!editU.custom} onChange={(e) => setEditU({ ...editU, custom: e.target.checked, tools: e.target.checked ? editU.tools?.length ? editU.tools : planById[editU.plan_id]?.tools || [] : planById[editU.plan_id]?.tools || [] })} />Personalizar ferramentas deste usuário (em vez de seguir o plano)</label>
+            <label className="flex items-center gap-2 text-sm mb-3 cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)]" checked={!!editU.custom} onChange={(e) => setEditU({ ...editU, custom: e.target.checked, tools: e.target.checked ? editU.tools?.length ? editU.tools : planById[editU.plan_id]?.tools || [] : planById[editU.plan_id]?.tools || [] })} />Personalizar ferramentas deste usuário (em vez de seguir o plano)</label>
             {editU.custom ? <ToolPicker value={editU.tools || []} onChange={(tools) => setEditU({ ...editU, tools })} />
               : <p className="text-xs text-fog">Segue o plano: {(planById[editU.plan_id]?.tools || []).map((k: string) => TOOLS.find((t) => t.key === k)?.label).filter(Boolean).join(", ") || "nenhuma ferramenta"}.</p>}
           </div>
@@ -272,7 +272,7 @@ export default function Admin() {
             <div className="md:col-span-4"><label className="label">Descrição</label><input className="input" value={editP.description || ""} onChange={(e) => setEditP({ ...editP, description: e.target.value })} /></div>
           </div>
           <div className="bg-panel2 rounded-xl p-4"><p className="label">Ferramentas incluídas</p><ToolPicker value={editP.tools || []} onChange={(tools) => setEditP({ ...editP, tools })} /></div>
-          <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" className="accent-[#6eefb6]" checked={editP.active !== false} onChange={(e) => setEditP({ ...editP, active: e.target.checked })} />Plano disponível para novos usuários</label>
+          <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)]" checked={editP.active !== false} onChange={(e) => setEditP({ ...editP, active: e.target.checked })} />Plano disponível para novos usuários</label>
           <p className="text-xs text-fog">Alterar as ferramentas do plano muda o acesso de todos os assinantes dele (exceto quem tem ferramentas personalizadas).</p>
           <div className="flex justify-between">{editP.id ? <button type="button" onClick={() => delPlan(editP)} className="btn btn-ghost btn-sm"><I.trash className="w-4 h-4" /></button> : <span />}<button disabled={busy} className="btn btn-mint">Salvar plano</button></div>
         </form>}

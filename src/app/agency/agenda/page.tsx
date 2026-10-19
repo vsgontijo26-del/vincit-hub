@@ -199,7 +199,7 @@ export default function Agenda() {
             {form.recurrence && <div><label className="label">Até (opcional)</label><input type="date" className="input" value={form.recurrence_until || ""} onChange={(e) => setForm({ ...form, recurrence_until: e.target.value })} /></div>}
           </div>
           <label className="flex items-start gap-2.5 mt-4 bg-panel2 rounded-xl p-3 cursor-pointer">
-            <input type="checkbox" className="accent-[#6eefb6] mt-0.5" checked={!!form.as_task} onChange={(e) => setForm({ ...form, as_task: e.target.checked })} />
+            <input type="checkbox" className="accent-[var(--color-mint)] mt-0.5" checked={!!form.as_task} onChange={(e) => setForm({ ...form, as_task: e.target.checked })} />
             <span className="text-sm">Mostrar em Tarefas<span className="block text-xs text-fog">O compromisso vira uma tarefa vinculada{form.recurrence ? " que se renova a cada ocorrência ao ser concluída" : ""}. Marque como feita aqui ou em Tarefas.</span></span>
           </label>
           {form.id && form.recurrence && form.occ && <p className="text-xs text-fog mt-3">Você está editando a série inteira ({recurLabel(form.recurrence).toLowerCase()}). Ocorrência clicada: {form.occ.split("-").reverse().join("/")}.</p>}

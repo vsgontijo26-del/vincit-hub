@@ -143,7 +143,7 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
               <ul className="space-y-1">
                 {subs.map((x) => (
                   <li key={x.id} className="flex items-center gap-2 bg-panel2 rounded-lg px-3 py-2 group">
-                    <input type="checkbox" checked={!!x.done} onChange={() => toggleSub(x)} className="accent-[#6eefb6]" />
+                    <input type="checkbox" checked={!!x.done} onChange={() => toggleSub(x)} className="accent-[var(--color-mint)]" />
                     <button onClick={() => (onOpen || setT)(x)} className={`flex-1 text-left text-sm ${x.done ? "line-through text-fog" : ""}`}>{x.title}</button>
                     {x.assignee && <span className="text-[10px] text-fog">{x.assignee}</span>}
                     <button onClick={() => delSub(x)} className="opacity-0 group-hover:opacity-100 text-fog hover:text-danger"><I.trash className="w-3.5 h-3.5" /></button>

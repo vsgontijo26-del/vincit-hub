@@ -88,7 +88,7 @@ export default function Estrategia() {
                 <p className="font-display font-bold mt-1">{ph.titulo}</p>
                 <p className="text-sm text-fog mt-1 mb-3">{ph.foco}</p>
                 <ul className="space-y-1.5">{(ph.acoes || []).map((a: any) => { const on = cur.done.includes(a.id); return (
-                  <li key={a.id}><label className="flex items-start gap-2 text-sm cursor-pointer"><input type="checkbox" className="accent-[#6eefb6] mt-1" checked={on} onChange={() => toggle(a.id)} /><span className={on ? "line-through text-fog" : ""}>{a.texto}</span></label></li>
+                  <li key={a.id}><label className="flex items-start gap-2 text-sm cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)] mt-1" checked={on} onChange={() => toggle(a.id)} /><span className={on ? "line-through text-fog" : ""}>{a.texto}</span></label></li>
                 ); })}</ul>
               </section>
             ))}

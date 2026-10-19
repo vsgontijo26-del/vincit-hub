@@ -5,6 +5,7 @@ import { brl } from "@/lib/agency";
 import Logo from "@/components/Logo";
 import CopyButton from "@/components/CopyButton";
 import InformPayment from "./InformPayment";
+import { brandCss } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
 const fmtD = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("pt-BR");
@@ -21,9 +22,10 @@ export default async function Cobranca({ params }: { params: Promise<{ token: st
 
   return (
     <main className="relative z-10 min-h-screen px-4 py-10">
+      {c.brand?.color && <style dangerouslySetInnerHTML={{ __html: brandCss(c.brand.color) }} />}
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <p className="font-display font-bold text-lg">{c.company?.name || "Cobrança"}</p>
+          {c.brand?.logo ? <Logo className="h-8" brand={c.brand} /> : <p className="font-display font-bold text-lg">{c.company?.name || "Cobrança"}</p>}
           <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${paid ? "bg-mint/15 text-mint" : cancelled ? "bg-panel2 text-fog" : v.daysLate > 0 ? "bg-danger/15 text-danger" : "bg-[#f5c84c]/15 text-[#f5c84c]"}`}>{paid ? "Pago" : cancelled ? "Cancelada" : c.status === "informado" ? "Pagamento informado" : v.daysLate > 0 ? `Vencida há ${v.daysLate} dia(s)` : "Em aberto"}</span>
         </div>
         <div className="card p-6">
@@ -62,7 +64,7 @@ export default async function Cobranca({ params }: { params: Promise<{ token: st
         <div className="text-center text-[11px] text-fog mt-8 space-y-1">
           {c.company?.cnpj && <p>{c.company.name} · CNPJ {c.company.cnpj}</p>}
           {(c.company?.email || c.company?.phone) && <p>{[c.company.email, c.company.phone].filter(Boolean).join(" · ")}</p>}
-          <p className="flex items-center justify-center gap-1.5 pt-2 opacity-70">by <Logo className="h-3" /> HUB</p>
+          <p className="flex items-center justify-center gap-1.5 pt-2 opacity-70">by <Logo className="h-3" vincitOnly /> HUB</p>
         </div>
       </div>
     </main>

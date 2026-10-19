@@ -6,6 +6,7 @@ import Logo from "@/components/Logo";
 import { I } from "@/components/icons";
 import { hideCPF, maskPhone } from "@/lib/br";
 import CompanySettings from "@/components/agency/CompanySettings";
+import BrandSettings from "@/components/BrandSettings";
 import { useAccess } from "@/lib/useAccess";
 import { hubAllowed } from "@/lib/access";
 
@@ -57,6 +58,7 @@ export default function Conta() {
             <p className="col-span-2 text-xs text-fog">Para alterar nome, CPF ou plano, fale com o administrador.</p>
           </section>
         )}
+        <BrandSettings />
         {acc && hubAllowed(acc.tools, "agency") && <CompanySettings />}
         <form onSubmit={save} className="card p-5 space-y-3">
           <p className="font-display font-bold">Alterar senha</p>
