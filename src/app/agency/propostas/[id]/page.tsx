@@ -88,6 +88,7 @@ export default function Proposta() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
         <input className="bg-transparent font-display text-3xl md:text-4xl font-extrabold tracking-tight outline-none border-b border-transparent focus:border-mint w-full" value={p.title} onChange={(e) => upd({ title: e.target.value })} />
         <div className="flex gap-2 shrink-0 items-center">
+          {p?.status === "aceita" && <Link href={`/agency/financeiro?tab=cobrancas&proposta=${p.id}`} className="btn btn-ghost btn-sm">Gerar cobrança</Link>}
           <span className={`chip ${p.status === "aceita" ? "chip-mint" : ""}`}>{PROPOSAL_STATUS[p.status]}</span>
           <button className="btn btn-ghost" onClick={() => save()} disabled={saved}>{saved ? "Salvo" : "Salvar"}</button>
           <button className="btn btn-mint" onClick={send}><A.ext className="w-4 h-4" />Gerar link</button>
