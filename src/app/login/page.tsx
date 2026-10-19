@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
 
@@ -9,6 +9,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // link de convite: /login?cadastro=1&email=...
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    if (q.get("cadastro")) setMode("up");
+    const e = q.get("email"); if (e) setEmail(e);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

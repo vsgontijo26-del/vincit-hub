@@ -4,6 +4,7 @@ import { I } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import { brl, brlShort } from "@/lib/agency";
 import { occurrences } from "@/components/tasks/shared";
+import { hubAllowed, type Access } from "@/lib/access";
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +23,15 @@ const hubs = [
   },
 ];
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ bloqueado?: string }> }) {
+  const { bloqueado } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const { data: accData } = await supabase.rpc("my_access");
+  const acc = (accData || { role: "user", tools: [] }) as Access;
+  const isAdmin = acc.role === "superadmin";
+  const hasAgency = hubAllowed(acc.tools, "agency");
+  const myHubs = hubs.filter((h) => hubAllowed(acc.tools, h.key as "creator" | "agency"));
   const hour = new Date().toLocaleString("pt-BR", { hour: "numeric", hour12: false, timeZone: "America/Sao_Paulo" });
   const h = parseInt(hour);
   const greet = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
@@ -81,7 +88,8 @@ export default async function Home() {
           <Logo className="h-6" />
           <span className="font-mono text-[11px] text-fog border border-line rounded-md px-1.5 py-0.5">HUB</span>
         </div>
-        <form action="/auth/signout" method="post" className="flex items-center gap-4">
+        <form action="/auth/signout" method="post" className="flex items-center gap-2 sm:gap-4">
+          {isAdmin && <Link href="/admin" className="btn btn-ghost btn-sm text-mint">Admin</Link>}
           <span className="text-xs text-fog hidden sm:block">{user?.email}</span>
           <button className="btn btn-ghost btn-sm"><I.logout className="w-3.5 h-3.5" />Sair</button>
         </form>
@@ -89,9 +97,11 @@ export default async function Home() {
 
       <section className="px-5 md:px-10 pt-10 pb-8 max-w-6xl mx-auto">
         <p className="font-mono text-xs text-mint tracking-widest uppercase rise">{greet} · {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}</p>
-        <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight mt-3 rise" style={{ animationDelay: ".05s" }}>Seu dia na VINCIT.</h1>
+        <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight mt-3 rise" style={{ animationDelay: ".05s" }}>{hasAgency ? "Seu dia na VINCIT." : "Bem-vindo ao VINCIT HUB."}</h1>
       </section>
 
+      {bloqueado && <section className="px-5 md:px-10 max-w-6xl mx-auto mb-4"><p className="card p-4 text-sm border-danger/40 text-danger">{bloqueado}. Fale com o administrador para liberar.</p></section>}
+      {hasAgency && <>
       <section className="px-5 md:px-10 max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <Link href="/agency/financeiro" className="card p-5 rise hover:border-slate">
           <p className="text-xs text-fog">Faturado no mês</p>
@@ -141,9 +151,10 @@ export default async function Home() {
         </div>
       </section>
 
+      </>}
       <section className="px-5 md:px-10 max-w-6xl mx-auto mb-4"><p className="label">Hubs</p></section>
       <section className="px-5 md:px-10 pb-20 max-w-6xl mx-auto grid md:grid-cols-2 gap-5">
-        {hubs.map((hub, i) => {
+        {myHubs.map((hub, i) => {
           const active = hub.status === "Ativo";
           return (
             <Link key={hub.key} href={hub.href}

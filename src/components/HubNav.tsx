@@ -4,17 +4,22 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Logo from "./Logo";
 import { I } from "./icons";
+import { useAccess } from "@/lib/useAccess";
+import { can, toolForPath } from "@/lib/access";
 
 export type NavItem = { href: string; label: string; Icon: (p: { className?: string }) => any; group?: string };
 
 export default function HubNav({ title, root, items }: { title: string; root: string; items: NavItem[] }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const acc = useAccess();
+  // esconde as ferramentas que não estão no plano do usuário
+  const visible = items.filter((it) => { const t = toolForPath(it.href); return !t || !acc || can(acc.tools, t); });
   const isActive = (h: string) => (h === root ? path === h : path.startsWith(h));
   let lastGroup: string | undefined;
   const nav = (
     <nav className="flex flex-col gap-0.5">
-      {items.map(({ href, label, Icon, group }) => {
+      {visible.map(({ href, label, Icon, group }) => {
         const header = group && group !== lastGroup ? group : null;
         lastGroup = group;
         return (
