@@ -70,14 +70,26 @@ export function toGoogleEvent(e: any, kindLabel?: string) {
 /** dia seguinte de uma data "YYYY-MM-DD" (fim exclusivo de evento de dia inteiro) */
 const nextDay = (d: string) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
 
-/** converte uma tarefa com prazo em evento de dia inteiro do Google (do início ao prazo, ou só no prazo) */
+/** tarefa que vai para o Google: com prazo, fora da Inbox e sem ser subtarefa */
+export const taskGoesToGoogle = (t: any) => !!t?.due_date && !t.parent_id && !t.inbox;
+
+/** converte uma tarefa com prazo em evento do Google: com horário se tiver due_time (1 h), senão dia inteiro do início ao prazo */
 export function toGoogleTask(t: any) {
-  const start = t.start_date && t.start_date <= t.due_date ? t.start_date : t.due_date;
   const desc = [t.description || "", t.assignee ? `Responsável: ${t.assignee}` : "", "— Tarefa do VINCIT HUB"].filter(Boolean).join("\n\n");
+  const hm = typeof t.due_time === "string" ? t.due_time.slice(0, 5) : "";
+  let when: any;
+  if (/^\d{2}:\d{2}$/.test(hm)) {
+    const st = `${t.due_date}T${hm}:00`;
+    const end = new Date(new Date(st + "Z").getTime() + 3600e3).toISOString().slice(0, 19);
+    when = { start: { dateTime: st, timeZone: TZ }, end: { dateTime: end, timeZone: TZ } };
+  } else {
+    const start = t.start_date && t.start_date <= t.due_date ? t.start_date : t.due_date;
+    when = { start: { date: start }, end: { date: nextDay(t.due_date) } };
+  }
   return {
     summary: (t.done ? "✓ " : "") + t.title,
     description: desc,
-    start: { date: start }, end: { date: nextDay(t.due_date) },
+    ...when,
     transparency: "transparent",
     extendedProperties: { private: { vincit_task: t.id } },
   };

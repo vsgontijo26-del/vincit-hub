@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { EVENT_KINDS } from "@/lib/agency";
-import { findTaskEvent, gcal, googleToken, toGoogleEvent, toGoogleTask } from "@/lib/google";
+import { findTaskEvent, gcal, googleToken, taskGoesToGoogle, toGoogleEvent, toGoogleTask } from "@/lib/google";
 
 /**
  * Envia compromissos da Agenda para o Google Agenda.
  * body: { event_id } cria/atualiza um · { delete: google_event_id } apaga um · { all: true } envia todos os futuros
- * Tarefas com prazo viram eventos de dia inteiro:
+ * Tarefas com prazo (sem Inbox nem subtarefas) viram eventos, regras em seu-dia/regras-seu-dia.md §4:
  * { task_id } cria/atualiza/remove uma · { delete_task: task_id } remove uma · { tasks: true } envia as abertas e as concluídas nos últimos 7 dias
  */
 export async function POST(request: Request) {
@@ -54,17 +54,18 @@ async function syncTasks(s: any, token: string, cal: string, b: any) {
     if (gid) await gcal(token, `/calendars/${cal}/events/${encodeURIComponent(gid)}`, { method: "DELETE" });
     return NextResponse.json({ ok: true });
   }
-  let q = s.from("ag_tasks").select("id,title,description,assignee,start_date,due_date,done,done_at");
+  // select * para aceitar due_time quando a coluna existir
+  let q = s.from("ag_tasks").select("*");
   if (b.task_id) q = q.eq("id", b.task_id);
-  else q = q.not("due_date", "is", null).or(`done.eq.false,done_at.gte.${new Date(Date.now() - 7 * 864e5).toISOString()}`);
+  else q = q.not("due_date", "is", null).is("parent_id", null).not("inbox", "is", true).or(`done.eq.false,done_at.gte.${new Date(Date.now() - 7 * 864e5).toISOString()}`);
   const { data: rows, error } = await q;
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
 
   let sent = 0; const errors: string[] = [];
   for (const t of rows || []) {
     const gid = await findTaskEvent(token, cal, t.id);
-    if (!t.due_date) {
-      // tarefa sem prazo não fica no Google
+    if (!taskGoesToGoogle(t)) {
+      // sem prazo, na Inbox ou subtarefa: não fica no Google
       if (gid) await gcal(token, `/calendars/${cal}/events/${encodeURIComponent(gid)}`, { method: "DELETE" });
       continue;
     }
