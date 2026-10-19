@@ -90,6 +90,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
         </div>
         <form action="/auth/signout" method="post" className="flex items-center gap-2 sm:gap-4">
           {isAdmin && <Link href="/admin" className="btn btn-ghost btn-sm text-mint">Admin</Link>}
+          <Link href="/conta" className="btn btn-ghost btn-sm">Minha conta</Link>
           <span className="text-xs text-fog hidden sm:block">{user?.email}</span>
           <button className="btn btn-ghost btn-sm"><I.logout className="w-3.5 h-3.5" />Sair</button>
         </form>

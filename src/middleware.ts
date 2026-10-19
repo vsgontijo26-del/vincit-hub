@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── controle de acesso da plataforma (assinatura) ──
-  if (user && !isPublic && !path.startsWith("/aguardando")) {
+  if (user && !isPublic && !path.startsWith("/aguardando") && !path.startsWith("/conta")) {
     const { data } = await supabase.rpc("my_access");
     const acc = (data || { role: "user", status: "pendente", tools: [] }) as Access;
     const go = (to: string, msg?: string) => {

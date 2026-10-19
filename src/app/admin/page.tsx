@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 import Modal from "@/components/agency/Modal";
 import CopyButton from "@/components/CopyButton";
 import { I } from "@/components/icons";
+import { hideCPF, isValidCPF, maskCPF, maskPhone, onlyDigits } from "@/lib/br";
 
 const STATUS: Record<string, { l: string; c: string }> = {
   ativo: { l: "Ativo", c: "#6eefb6" }, pendente: { l: "Pendente", c: "#f5c84c" }, suspenso: { l: "Suspenso", c: "#ff6b6b" }, expirado: { l: "Vencido", c: "#ff6b6b" },
@@ -58,7 +59,7 @@ export default function Admin() {
 
   const load = useCallback(async () => {
     const s = createClient();
-    const [u, p, i] = await Promise.all([s.rpc("admin_users"), s.from("plans").select("*").order("position"), s.from("invites").select("*").order("created_at", { ascending: false })]);
+    const [u, p, i] = await Promise.all([s.rpc("admin_users_v2"), s.from("plans").select("*").order("position"), s.from("invites").select("*").order("created_at", { ascending: false })]);
     if (u.error) setErr(u.error.message);
     setUsers(u.data || []); setPlans(p.data || []); setInvites(i.data || []);
   }, []);
@@ -72,12 +73,15 @@ export default function Admin() {
   const mrr = active.reduce((a, u) => { const p = planById[u.plan_id]; return a + (p ? Number(p.price) / (PERIOD_MONTHS[p.period] || 1) : 0); }, 0);
   const pending = clients.filter((u) => u.status === "pendente");
   const expiring = active.filter((u) => u.expires_at && u.expires_at >= td && u.expires_at <= in7);
-  const list = users.filter((u) => (!fStatus || eff(u) === fStatus) && (!q || `${u.email} ${u.name || ""} ${u.company || ""}`.toLowerCase().includes(q.toLowerCase())));
+  const list = users.filter((u) => (!fStatus || eff(u) === fStatus) && (!q || `${u.email} ${u.name || ""} ${u.company || ""} ${u.cpf || ""}`.toLowerCase().includes(q.toLowerCase())));
 
   async function saveUser(e: React.FormEvent) {
     e.preventDefault(); setBusy(true);
     const u = editU;
+    const cpf = onlyDigits(u.cpf || "");
+    if (cpf && !isValidCPF(cpf)) { setBusy(false); return setErr("CPF inválido."); }
     const { error } = await createClient().from("profiles").update({
+      cpf: cpf || null, phone: onlyDigits(u.phone || "") || null,
       name: u.name || null, company: u.company || null, status: u.status, plan_id: u.plan_id || null,
       tools: u.custom ? u.tools || [] : null, expires_at: u.expires_at || null, notes: u.notes || null, updated_at: new Date().toISOString(),
     }).eq("id", u.id);
@@ -149,7 +153,7 @@ export default function Admin() {
         {tab === "usuarios" && (
           <>
             <div className="flex flex-wrap gap-2 mb-4">
-              <input className="input !py-1.5 !w-60" placeholder="Buscar nome, e-mail, empresa…" value={q} onChange={(e) => setQ(e.target.value)} />
+              <input className="input !py-1.5 !w-60" placeholder="Buscar nome, e-mail, CPF…" value={q} onChange={(e) => setQ(e.target.value)} />
               {["", "ativo", "pendente", "suspenso", "expirado"].map((s) => <button key={s || "all"} onClick={() => setFStatus(s)} className={`btn btn-sm ${fStatus === s ? "btn-mint" : "btn-ghost"}`}>{s ? STATUS[s].l : "Todos"}</button>)}
               <button onClick={() => { setTab("convites"); setInv({ email: "", plan_id: plans[0]?.id || "" }); }} className="btn btn-mint btn-sm ml-auto"><I.plus className="w-4 h-4" />Novo usuário</button>
             </div>
@@ -159,7 +163,7 @@ export default function Admin() {
                 <tbody>
                   {list.map((u) => (
                     <tr key={u.id} className="border-b border-line/60 last:border-0 hover:bg-panel2/50">
-                      <td className="py-3 px-4"><p className="font-medium">{u.name || u.email}{u.role === "superadmin" && <span className="ml-2 text-[10px] font-mono text-ink bg-mint rounded px-1">ADMIN</span>}</p><p className="text-xs text-fog">{u.name ? u.email : ""}{u.company ? ` · ${u.company}` : ""}{!u.confirmed ? " · e-mail não confirmado" : ""}</p></td>
+                      <td className="py-3 px-4"><p className="font-medium">{u.name || u.email}{u.role === "superadmin" && <span className="ml-2 text-[10px] font-mono text-ink bg-mint rounded px-1">ADMIN</span>}</p><p className="text-xs text-fog">{u.name ? u.email : ""}{u.cpf ? ` · CPF ${hideCPF(u.cpf)}` : " · sem CPF"}{u.company ? ` · ${u.company}` : ""}{!u.confirmed ? " · e-mail não confirmado" : ""}</p></td>
                       <td className="px-4"><Chip s={eff(u)} /></td>
                       <td className="px-4">{u.role === "superadmin" ? <span className="text-fog text-xs">Acesso total</span> : <>{planById[u.plan_id]?.name || <span className="text-fog">Sem plano</span>}{u.tools && <span className="text-[10px] text-fog ml-1">(personalizado)</span>}</>}</td>
                       <td className={`px-4 text-xs ${u.expires_at && u.expires_at < td ? "text-danger" : "text-fog"}`}>{u.role === "superadmin" ? "–" : u.expires_at ? fmtDate(u.expires_at) : "Sem vencimento"}</td>
@@ -236,6 +240,8 @@ export default function Admin() {
           <div className="grid md:grid-cols-2 gap-3">
             <div><label className="label">Nome</label><input className="input" value={editU.name || ""} onChange={(e) => setEditU({ ...editU, name: e.target.value })} /></div>
             <div><label className="label">Empresa</label><input className="input" value={editU.company || ""} onChange={(e) => setEditU({ ...editU, company: e.target.value })} /></div>
+            <div><label className="label">CPF</label><input className="input" inputMode="numeric" value={maskCPF(editU.cpf || "")} onChange={(e) => setEditU({ ...editU, cpf: onlyDigits(e.target.value) })} placeholder="000.000.000-00" />{editU.cpf?.length === 11 && <p className={`text-[11px] mt-1 ${isValidCPF(editU.cpf) ? "text-mint" : "text-danger"}`}>{isValidCPF(editU.cpf) ? "✓ CPF válido" : "CPF inválido"}</p>}</div>
+            <div><label className="label">WhatsApp</label><div className="flex gap-2"><input className="input" inputMode="tel" value={maskPhone(editU.phone || "")} onChange={(e) => setEditU({ ...editU, phone: onlyDigits(e.target.value) })} placeholder="(00) 00000-0000" />{editU.phone && <a href={`https://wa.me/55${editU.phone}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">Abrir</a>}</div></div>
             <div><label className="label">Status</label><select className="input" value={editU.status} onChange={(e) => setEditU({ ...editU, status: e.target.value })}><option value="ativo">Ativo</option><option value="pendente">Pendente</option><option value="suspenso">Suspenso</option></select></div>
             <div><label className="label">Plano</label><select className="input" value={editU.plan_id || ""} onChange={(e) => setEditU({ ...editU, plan_id: e.target.value, tools: editU.custom ? editU.tools : planById[e.target.value]?.tools || [] })}><option value="">Sem plano</option>{plans.map((p) => <option key={p.id} value={p.id}>{p.name}{!p.active ? " (inativo)" : ""}</option>)}</select></div>
             <div><label className="label">Válido até</label><div className="flex gap-2"><input type="date" className="input" value={editU.expires_at || ""} onChange={(e) => setEditU({ ...editU, expires_at: e.target.value })} /><button type="button" onClick={() => renew(editU)} className="btn btn-ghost btn-sm whitespace-nowrap">+1 período</button></div><p className="text-[11px] text-fog mt-1">Vazio = sem vencimento.</p></div>
