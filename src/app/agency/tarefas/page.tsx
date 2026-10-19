@@ -7,6 +7,8 @@ import { I } from "@/components/icons";
 import { PRIORITIES, STATUS_TYPES, Flag, Recur, recurLabel } from "@/components/tasks/shared";
 import SpaceSettings from "@/components/tasks/SpaceSettings";
 import TaskDrawer from "@/components/tasks/TaskDrawer";
+import WeekView from "@/components/tasks/WeekView";
+import Routines from "@/components/tasks/Routines";
 
 const TYPE_COLOR: Record<string, string> = { aberto: "#8a8f94", andamento: "#f5c84c", concluido: "#6eefb6" };
 const ls = { get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -18,7 +20,7 @@ export default function Tarefas() {
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState<{ space?: string; list?: string; inbox?: boolean }>({});
   const [draft, setDraft] = useState("");
-  const [view, setView] = useState<"lista" | "quadro">("lista");
+  const [view, setView] = useState<"lista" | "quadro" | "semana">("lista");
   const [q, setQ] = useState("");
   const [who, setWho] = useState("");
   const [tag, setTag] = useState("");
@@ -31,6 +33,7 @@ export default function Tarefas() {
   const [drag, setDrag] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [routines, setRoutines] = useState(false);
   const td = today();
 
   const load = useCallback(async () => {
@@ -50,7 +53,7 @@ export default function Tarefas() {
   }, []);
   useEffect(() => {
     load();
-    const v = ls.get("vh.tasks.view"); if (v === "quadro" || v === "lista") setView(v);
+    const v = ls.get("vh.tasks.view"); if (v === "quadro" || v === "lista" || v === "semana") setView(v);
     const sv = ls.get("vh.tasks.sel"); if (sv) try { setSel(JSON.parse(sv)); } catch {}
   }, [load]);
   useEffect(() => { ls.set("vh.tasks.view", view); }, [view]);
@@ -182,6 +185,7 @@ export default function Tarefas() {
             {space && <span className="w-3 h-3 rounded-sm" style={{ background: space.color }} />}
             <h2 className="font-display font-bold text-lg mr-auto truncate">{crumb}</h2>
             {space && <button onClick={() => setCfg({ open: true, space })} className="btn btn-ghost btn-sm">⚙ Etapas, listas e tags</button>}
+            <button onClick={() => setRoutines(true)} className="btn btn-ghost btn-sm"><Recur className="w-3.5 h-3.5" /> Rotinas</button>
             {!sel.inbox && <button onClick={newTask} className="btn btn-mint btn-sm"><I.plus className="w-4 h-4" /> Tarefa</button>}
           </div>
           {navOpen && <div className="lg:hidden card p-2 mb-3">{sidebar}</div>}
@@ -209,7 +213,7 @@ export default function Tarefas() {
           ) : (<>
           <div className="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-line">
             <div className="flex bg-panel2 rounded-lg p-0.5">
-              {(["lista", "quadro"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1 text-sm rounded-md capitalize ${view === v ? "bg-ink text-mint" : "text-fog"}`}>{v === "lista" ? "☰ Lista" : "▦ Quadro"}</button>)}
+              {(["lista", "quadro", "semana"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1 text-sm rounded-md capitalize ${view === v ? "bg-ink text-mint" : "text-fog"}`}>{v === "lista" ? "☰ Lista" : v === "quadro" ? "▦ Quadro" : "▤ Semana"}</button>)}
             </div>
             <input className="input !py-1.5 !w-44" placeholder="Buscar…" value={q} onChange={(e) => setQ(e.target.value)} />
             <select className="input !py-1.5 !w-auto" value={who} onChange={(e) => setWho(e.target.value)}><option value="">Responsável</option>{d.team.map((m) => <option key={m.id}>{m.name}</option>)}</select>
@@ -218,7 +222,9 @@ export default function Tarefas() {
             <label className="flex items-center gap-1.5 text-sm text-fog ml-auto cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)]" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> Concluídas{hiddenDone ? ` (${hiddenDone})` : ""}</label>
           </div>
 
-          {loading ? <p className="text-fog text-sm py-10 text-center">Carregando…</p> : view === "lista" ? (
+          {loading ? <p className="text-fog text-sm py-10 text-center">Carregando…</p> : view === "semana" ? (
+            <WeekView tasks={visible} statusById={statusById} spaces={d.spaces} today={td} showDone={showDone} onOpen={setOpen} onToggle={toggleDone} onChanged={load} />
+          ) : view === "lista" ? (
             <div className="space-y-5">
               {shown.map((g) => (
                 <div key={g.key} onDragOver={(e) => { e.preventDefault(); setOver(g.key); }} onDragLeave={() => setOver(null)} onDrop={() => { if (drag) moveTo(drag, g); setDrag(null); setOver(null); }} className={`rounded-xl ${over === g.key ? "ring-1 ring-mint/50" : ""}`}>
@@ -296,6 +302,7 @@ export default function Tarefas() {
           statuses={d.statuses} lists={d.lists} tags={d.tags} tasks={d.tasks}
           onChanged={(id) => { load(); if (id) setSel({ space: id }); }} />
       )}
+      <Routines open={routines} onClose={() => setRoutines(false)} spaces={d.spaces} statuses={d.statuses} tasks={d.tasks} today={td} onChanged={load} />
       <TaskDrawer task={open} onClose={() => setOpen(null)} onChanged={load} spaces={d.spaces} statuses={d.statuses} lists={d.lists} tags={d.tags} team={d.team} projects={d.projects} tasks={d.tasks} onOpen={setOpen} />
     </>
   );
