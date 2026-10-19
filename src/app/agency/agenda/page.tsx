@@ -13,11 +13,13 @@ import { I } from "@/components/icons";
 import { A } from "@/components/agency/icons";
 
 const WD = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const KINDS = [...EVENT_KINDS, { k: "tarefa", l: "Tarefas", c: "#c084fc" }];
+const KINDS = [...EVENT_KINDS, { k: "tarefa", l: "Tarefas", c: "#c084fc" }, { k: "google", l: "Google Agenda", c: "#7aa7ff" }];
+/** envia a mudança para o Google Agenda, se conectado (não bloqueia a tela) */
+const gsync = (body: any) => fetch("/api/google/sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json()).catch(() => null);
 const toLocal = (iso: string) => new Date(new Date(iso).getTime() - 3 * 3600e3).toISOString().slice(0, 16);
 const pad = (n: number) => String(n).padStart(2, "0");
 
-type E = { id: string; title: string; kind: string; date: string; time?: string; href?: string; ev?: any; task?: any; linked?: any; projected?: boolean; recurring?: boolean };
+type E = { id: string; title: string; kind: string; date: string; time?: string; href?: string; ext?: string; ev?: any; task?: any; linked?: any; projected?: boolean; recurring?: boolean };
 
 export default function Agenda() {
   const ev = useTable<any>("ag_events", { order: "starts_at", asc: true });
@@ -30,6 +32,8 @@ export default function Agenda() {
   const [hidden, setHidden] = useState<string[]>([]);
   const [openTask, setOpenTask] = useState<any>(null);
   const [busy, setBusy] = useState(false);
+  const [gEvents, setGEvents] = useState<any[]>([]);
+  const [gOn, setGOn] = useState(false);
   const td = today();
 
   const loadTasks = useCallback(async () => {
@@ -47,6 +51,11 @@ export default function Agenda() {
   const first = new Date(y, m, 1).getDay();
   const days = new Date(y, m + 1, 0).getDate();
   const from = `${y}-${pad(m + 1)}-01`, to = `${y}-${pad(m + 1)}-${pad(days)}`;
+  useEffect(() => {
+    let alive = true;
+    fetch(`/api/google/events?from=${from}&to=${to}`).then((r) => r.json()).then((j) => { if (alive) { setGEvents(j.events || []); setGOn(!!j.connected); } }).catch(() => {});
+    return () => { alive = false; };
+  }, [from, to]);
   const cells = Array.from({ length: Math.ceil((first + days) / 7) * 7 }, (_, i) => { const d = i - first + 1; return d >= 1 && d <= days ? `${y}-${pad(m + 1)}-${pad(d)}` : null; });
 
   // tarefa aberta vinculada a cada compromisso
@@ -71,6 +80,7 @@ export default function Agenda() {
     }),
     ...pr.rows.filter((p) => p.shoot_date).map((p) => ({ id: "s" + p.id, title: p.title, kind: "captacao", date: p.shoot_date, href: `/agency/projetos/${p.id}` })),
     ...pr.rows.filter((p) => p.due_date && p.stage !== "entregue").map((p) => ({ id: "d" + p.id, title: "Entrega: " + p.title, kind: "entrega", date: p.due_date, href: `/agency/projetos/${p.id}` })),
+    ...gEvents.map((g) => ({ id: "g" + g.id, title: g.title, kind: "google", date: g.date, time: g.time || undefined, ext: g.link })),
     ...tx.rows.filter((x) => !x.paid && x.kind === "entrada").map((x) => ({ id: "t" + x.id, title: x.description, kind: "pagamento", date: x.due_date, href: "/agency/financeiro" })),
   ].filter((e) => !hidden.includes(e.kind));
   const byDay = (d: string) => all.filter((e) => e.date === d).sort((a, b) => (a.time || "99").localeCompare(b.time || "99"));
@@ -91,6 +101,7 @@ export default function Agenda() {
     };
     const saved = await ev.save(row);
     if (saved) {
+      gsync({ event_id: (saved as any).id }).then((r) => { if (r?.sent) ev.reload(); });
       const s = createClient();
       const date = f.starts_at.slice(0, 10);
       // próxima ocorrência a partir de hoje (para séries que começaram no passado)
@@ -110,12 +121,15 @@ export default function Agenda() {
   async function removeEvent() {
     const s = createClient();
     await s.from("ag_tasks").delete().eq("event_id", form.id).eq("done", false);
-    await ev.remove(form.id); await loadTasks(); setForm(null);
+    const gid = ev.rows.find((x) => x.id === form.id)?.google_event_id;
+    await ev.remove(form.id);
+    if (gid) gsync({ delete: gid }); await loadTasks(); setForm(null);
   }
   async function skipOccurrence() {
     const ex = Array.from(new Set([...(form.exdates || []), form.occ]));
     const s = createClient();
     await s.from("ag_events").update({ exdates: ex }).eq("id", form.id);
+    gsync({ event_id: form.id });
     // se a tarefa aberta era desta data, pula para a próxima ocorrência
     const cur = linkedOpen(form.id);
     if (cur && cur.due_date === form.occ) {
@@ -165,7 +179,7 @@ export default function Agenda() {
           <button onClick={() => setCursor(new Date(y, m + 1, 1))} className="btn btn-ghost btn-sm"><A.chevR className="w-4 h-4" /></button>
           <button onClick={() => { const d = new Date(); setCursor(new Date(d.getFullYear(), d.getMonth(), 1)); }} className="btn btn-ghost btn-sm">Hoje</button>
         </div>
-        <div className="flex flex-wrap gap-1.5">{KINDS.map((k) => (
+        <div className="flex flex-wrap gap-1.5">{KINDS.filter((k) => k.k !== "google" || gOn).map((k) => (
           <button key={k.k} onClick={() => setHidden(hidden.includes(k.k) ? hidden.filter((x) => x !== k.k) : [...hidden, k.k])} className={`chip ${hidden.includes(k.k) ? "opacity-40" : ""}`}><span className="w-2 h-2 rounded-full" style={{ background: k.c }} />{k.l}</button>
         ))}</div>
       </div>
@@ -179,7 +193,8 @@ export default function Agenda() {
                 <p className={`text-xs mb-1 w-6 h-6 grid place-items-center rounded-full ${d === td ? "bg-mint text-black font-bold" : "text-fog"}`}>{Number(d.slice(8))}</p>
                 <div className="space-y-0.5">
                   {byDay(d).slice(0, 4).map((e) =>
-                    e.href ? <Link key={e.id} href={e.href} onClick={(x) => x.stopPropagation()} className="block"><Chip e={e} /></Link>
+                    e.ext ? <a key={e.id} href={e.ext} target="_blank" rel="noopener noreferrer" onClick={(x) => x.stopPropagation()} className="block" title="Abrir no Google Agenda"><Chip e={e} /></a>
+                    : e.href ? <Link key={e.id} href={e.href} onClick={(x) => x.stopPropagation()} className="block"><Chip e={e} /></Link>
                       : <button key={e.id} className="w-full text-left" onClick={(x) => { x.stopPropagation(); e.ev ? openEvent(e) : setOpenTask(e.task); }}><Chip e={e} /></button>
                   )}
                   {byDay(d).length > 4 && <p className="text-[10px] text-fog px-1">+{byDay(d).length - 4}</p>}
@@ -189,7 +204,7 @@ export default function Agenda() {
           ))}
         </div>
       </div>
-      <p className="text-xs text-fog mt-3 flex items-center gap-1.5"><Recur /> repete · contorno tracejado = próxima ocorrência prevista · bolinha = marcar a tarefa como feita</p>
+      <p className="text-xs text-fog mt-3 flex items-center gap-1.5"><Recur /> repete · contorno tracejado = próxima ocorrência prevista · bolinha = marcar a tarefa como feita{gOn ? " · azul = evento do seu Google Agenda" : <> · <Link href="/conta#google" className="underline hover:text-paper">conectar Google Agenda</Link></>}</p>
 
       <Modal open={!!form} title={form?.id ? "Compromisso" : "Novo compromisso"} onClose={() => setForm(null)}>
         {form && <form onSubmit={submit}>

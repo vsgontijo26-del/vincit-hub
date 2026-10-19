@@ -7,6 +7,7 @@ import { I } from "@/components/icons";
 import { hideCPF, maskPhone } from "@/lib/br";
 import CompanySettings from "@/components/agency/CompanySettings";
 import BrandSettings from "@/components/BrandSettings";
+import GoogleSettings from "@/components/GoogleSettings";
 import { useAccess } from "@/lib/useAccess";
 import { hubAllowed } from "@/lib/access";
 
@@ -60,6 +61,7 @@ export default function Conta() {
         )}
         <BrandSettings />
         {acc && hubAllowed(acc.tools, "agency") && <CompanySettings />}
+        {acc && hubAllowed(acc.tools, "agency") && <GoogleSettings />}
         <form onSubmit={save} className="card p-5 space-y-3">
           <p className="font-display font-bold">Alterar senha</p>
           <div className="relative"><input className="input pr-11" type={show ? "text" : "password"} value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Nova senha" autoComplete="new-password" />

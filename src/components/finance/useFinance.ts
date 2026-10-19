@@ -34,7 +34,11 @@ export function useFinance() {
       acc = await s.from("fin_accounts").select("*").order("position").order("created_at");
     }
     if (!cat.error && !(cat.data || []).length) {
-      await s.from("fin_categories").insert(DEFAULT_CATS.map(([name, kind, color]) => ({ name, kind, color })));
+      // padrão + categorias que já existiam nos lançamentos antigos (evita lançamento "órfão")
+      const { data: used } = await s.from("ag_transactions").select("category,kind").not("category", "is", null);
+      const rows = DEFAULT_CATS.map(([name, kind, color]) => ({ name, kind, color }));
+      for (const u of used || []) if (u.category !== "Transferência" && !rows.some((r) => r.name === u.category && r.kind === u.kind)) rows.push({ name: u.category, kind: u.kind, color: "#8a8f94" });
+      await s.from("fin_categories").insert(rows);
       cat = await s.from("fin_categories").select("*").order("name");
     }
     const [tx, cl, pr, ch, st] = await Promise.all([

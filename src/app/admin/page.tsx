@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 import Modal from "@/components/agency/Modal";
 import CopyButton from "@/components/CopyButton";
 import { I } from "@/components/icons";
+import Metrics from "@/components/admin/Metrics";
 import { hideCPF, isValidCPF, maskCPF, maskPhone, onlyDigits } from "@/lib/br";
 
 const STATUS: Record<string, { l: string; c: string }> = {
@@ -45,7 +46,7 @@ function ToolPicker({ value, onChange }: { value: string[]; onChange: (v: string
 }
 
 export default function Admin() {
-  const [tab, setTab] = useState<"usuarios" | "convites" | "planos">("usuarios");
+  const [tab, setTab] = useState<"usuarios" | "convites" | "planos" | "metricas">("usuarios");
   const [users, setUsers] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
@@ -146,9 +147,11 @@ export default function Admin() {
 
         {err && <p className="card p-3 mt-4 text-sm text-danger border-danger/40 flex justify-between">{err}<button onClick={() => setErr(null)}>×</button></p>}
 
-        <div className="flex gap-1 border-b border-line mt-8 mb-5">{([["usuarios", `Usuários (${users.length})`], ["convites", `Convites (${invites.filter((i) => !i.accepted_at).length})`], ["planos", `Planos (${plans.length})`]] as const).map(([k, l]) => (
+        <div className="flex gap-1 border-b border-line mt-8 mb-5">{([["usuarios", `Usuários (${users.length})`], ["convites", `Convites (${invites.filter((i) => !i.accepted_at).length})`], ["planos", `Planos (${plans.length})`], ["metricas", "Métricas"]] as const).map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 text-sm border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>
         ))}</div>
+
+        {tab === "metricas" && <Metrics />}
 
         {tab === "usuarios" && (
           <>
