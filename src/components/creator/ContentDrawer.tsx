@@ -43,7 +43,15 @@ export default function ContentDrawer({ item, statuses, accounts, clients, pilla
       if (b.length) { setErr(b); return false; }
     }
     setBusy(true);
-    const row: any = {}; for (const k of [...fields, ...Object.keys(extra)]) row[k] = next[k] === "" ? null : next[k];
+    // post publicado fora do HUB: identifica o post na conta conectada para puxar as métricas
+    if ((next.post_url || "") !== (item.post_url || "")) {
+      extra = { ...extra, ig_media_id: null };
+      const r = !next.post_url ? null : await fetch("/api/meta/resolve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: next.post_url, account_id: next.account_id || undefined }) }).catch(() => null);
+      const j = r?.ok ? await r.json().catch(() => null) : null;
+      if (j?.post?.ig_media_id) extra = { ...extra, ig_media_id: j.post.ig_media_id };
+    }
+    const all = { ...next, ...extra };
+    const row: any = {}; for (const k of [...fields, ...Object.keys(extra)]) row[k] = all[k] === "" ? null : all[k];
     const { error } = await s().from("content_ideas").update(row).eq("id", item.id);
     setBusy(false);
     if (error) { setErr([error.message]); return false; }

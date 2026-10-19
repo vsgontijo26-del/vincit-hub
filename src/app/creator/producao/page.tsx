@@ -6,14 +6,14 @@ import PageHead from "@/components/PageHead";
 import { I } from "@/components/icons";
 import ContentDrawer from "@/components/creator/ContentDrawer";
 import StatusSettings from "@/components/creator/StatusSettings";
-import { MAX_REVISIONS, blockers, isLate, shortDate, useContentStatuses } from "@/lib/content";
+import { FORMAT_LIST, MAX_REVISIONS, blockers, isLate, shortDate, useContentStatuses } from "@/lib/content";
 
 export default function Producao() {
   const { accounts } = useAccounts();
   const { statuses, reload: reloadStatuses } = useContentStatuses();
   const [items, setItems] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
-  const [f, setF] = useState({ account: "", client: "", assignee: "", archived: false });
+  const [f, setF] = useState({ account: "", client: "", assignee: "", pillar: "", format: "", archived: false });
   const [sel, setSel] = useState<any>(null);
   const [nw, setNw] = useState("");
   const [drag, setDrag] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export default function Producao() {
   // abre um conteúdo direto pelo link (?c=id), vindo do Planejador ou de Seu dia
   useEffect(() => { const id = new URLSearchParams(location.search).get("c"); if (id && items.length && !sel) { const it = items.find((x) => x.id === id); if (it) setSel(it); } }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const shown = items.filter((i) => (f.archived ? !!i.archived_at : !i.archived_at) && (!f.account || i.account_id === f.account) && (!f.client || i.client_id === f.client) && (!f.assignee || i.assignee === f.assignee));
+  const shown = items.filter((i) => (f.archived ? !!i.archived_at : !i.archived_at) && (!f.account || i.account_id === f.account) && (!f.client || i.client_id === f.client) && (!f.assignee || i.assignee === f.assignee) && (!f.pillar || i.pillar === f.pillar) && (!f.format || i.format === f.format));
   const assignees = useMemo(() => Array.from(new Set(items.map((i) => i.assignee).filter(Boolean))).sort(), [items]);
   const pillars = useMemo(() => Array.from(new Set(items.map((i) => i.pillar).filter(Boolean))).sort(), [items]);
   const late = shown.filter((i) => isLate(i, statuses)).length;
@@ -62,6 +62,8 @@ export default function Producao() {
         <select className="input !w-auto" value={f.account} onChange={(e) => setF({ ...f, account: e.target.value })}><option value="">Todos os perfis</option>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select>
         {clients.length > 0 && <select className="input !w-auto" value={f.client} onChange={(e) => setF({ ...f, client: e.target.value })}><option value="">Todos os clientes</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.company || c.name}</option>)}</select>}
         {assignees.length > 0 && <select className="input !w-auto" value={f.assignee} onChange={(e) => setF({ ...f, assignee: e.target.value })}><option value="">Todos os responsáveis</option>{assignees.map((a) => <option key={a}>{a}</option>)}</select>}
+        {pillars.length > 0 && <select className="input !w-auto" value={f.pillar} onChange={(e) => setF({ ...f, pillar: e.target.value })}><option value="">Todos os pilares</option>{pillars.map((x) => <option key={x}>{x}</option>)}</select>}
+        <select className="input !w-auto" value={f.format} onChange={(e) => setF({ ...f, format: e.target.value })}><option value="">Todos os formatos</option>{FORMAT_LIST.map((x) => <option key={x}>{x}</option>)}</select>
         <button onClick={() => setF({ ...f, archived: !f.archived })} className={`btn btn-sm ${f.archived ? "btn-mint" : "btn-ghost"}`}>Arquivados</button>
         {late > 0 && <span className="text-sm text-danger ml-auto">{late} atrasado{late > 1 ? "s" : ""}</span>}
       </div>
@@ -101,6 +103,7 @@ export default function Producao() {
                         <p className="text-[11px] text-fog mt-1 truncate">{acc ? `@${acc.username}` : "Sem perfil"}{cl ? ` · ${cl.company || cl.name}` : ""}{it.assignee ? ` · ${it.assignee}` : ""}</p>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {it.format && <span className="chip">{it.format}</span>}
+                          {it.pillar && <span className="chip">{it.pillar}</span>}
                           {it.planned_for && <span className="chip" style={lt ? { color: "#ff6b6b" } : undefined}>{lt ? "Atrasado · " : ""}{shortDate(it.planned_for)}</span>}
                           {it.approval === "pendente" && <span className="chip" style={{ color: "#f5c84c" }}>Com o cliente</span>}
                           {it.approval === "ajuste" && <span className="chip" style={{ color: "#ff6b6b" }}>Ajuste</span>}
