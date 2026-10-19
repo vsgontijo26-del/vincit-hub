@@ -62,7 +62,7 @@ export default function GoogleSettings() {
         <span className="w-10 h-10 rounded-xl bg-panel2 grid place-items-center text-mint shrink-0"><GIcon /></span>
         <div className="flex-1 min-w-0">
           <p className="font-display font-bold">Google Agenda</p>
-          <p className="text-xs text-fog mt-0.5">Sincronize a Agenda do GESTOR com o seu Google Agenda.</p>
+          <p className="text-xs text-fog mt-0.5">Sincronize a Agenda do Gestor com o seu Google Agenda.</p>
         </div>
       </div>
 

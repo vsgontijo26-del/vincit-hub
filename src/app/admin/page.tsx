@@ -14,7 +14,7 @@ import { hideCPF, isValidCPF, maskCPF, maskPhone, onlyDigits } from "@/lib/br";
 const STATUS: Record<string, { l: string; c: string }> = {
   ativo: { l: "Ativo", c: "#6eefb6" }, pendente: { l: "Pendente", c: "#f5c84c" }, suspenso: { l: "Suspenso", c: "#ff6b6b" }, expirado: { l: "Vencido", c: "#ff6b6b" },
 };
-const HUBS: [string, string][] = [["creator", "CREATOR"], ["agency", "GESTOR"], ["geral", "Geral"]];
+const HUBS: [string, string][] = [["creator", "Creator"], ["agency", "Gestor"], ["geral", "Geral"]];
 const PERIOD_MONTHS: Record<string, number> = { mensal: 1, trimestral: 3, semestral: 6, anual: 12 };
 const todayStr = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
 const fmtDate = (d?: string | null) => (d ? new Date(d.length === 10 ? d + "T12:00:00" : d).toLocaleDateString("pt-BR") : "–");

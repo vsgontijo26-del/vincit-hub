@@ -44,7 +44,7 @@ export default function Perfil() {
     setEdit(false);
   }
   async function remove() {
-    if (!confirm(`Remover @${acc.username} do CREATOR? Posts e automações dele também serão removidos.`)) return;
+    if (!confirm(`Remover @${acc.username} do Creator? Posts e automações dele também serão removidos.`)) return;
     await createClient().from("ig_accounts").delete().eq("id", id);
     router.push("/creator/perfis");
   }

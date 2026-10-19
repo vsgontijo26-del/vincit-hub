@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Logo from "@/components/Logo";
+import TopBar from "@/components/TopBar";
 import { I } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import { brl, brlShort } from "@/lib/agency";
@@ -10,13 +10,13 @@ export const dynamic = "force-dynamic";
 
 const hubs = [
   {
-    key: "creator", name: "CREATOR", href: "/creator", status: "Ativo",
+    key: "creator", name: "Creator", href: "/creator", status: "Ativo",
     desc: "Análise do perfil, criação e planejamento de conteúdo e estratégia de crescimento.",
     items: ["Briefing", "Desempenho & insights", "Tendências", "Referências", "Formatos criativos", "Laboratório", "Planejador", "Estratégia", "Automações"],
     Icon: I.camera,
   },
   {
-    key: "agency", name: "GESTOR", href: "/agency", status: "Ativo",
+    key: "agency", name: "Gestor", href: "/agency", status: "Ativo",
     desc: "Gestão da produtora: operação, comercial e recursos.",
     items: ["Projetos", "Tarefas", "Agenda", "Clientes", "Funil", "Financeiro", "Propostas", "Equipe", "Equipamentos"],
     Icon: I.briefcase,
@@ -26,10 +26,8 @@ const hubs = [
 export default async function Home({ searchParams }: { searchParams: Promise<{ bloqueado?: string }> }) {
   const { bloqueado } = await searchParams;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
   const { data: accData } = await supabase.rpc("my_access");
   const acc = (accData || { role: "user", tools: [] }) as Access;
-  const isAdmin = acc.role === "superadmin";
   const hasAgency = hubAllowed(acc.tools, "agency");
   const myHubs = hubs.filter((h) => hubAllowed(acc.tools, h.key as "creator" | "agency"));
   const hour = new Date().toLocaleString("pt-BR", { hour: "numeric", hour12: false, timeZone: "America/Sao_Paulo" });
@@ -83,18 +81,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
 
   return (
     <main className="relative z-10 min-h-screen">
-      <header className="flex items-center justify-between px-5 md:px-10 py-6 border-b border-line">
-        <div className="flex items-center gap-3">
-          <Logo className="h-6" />
-          <span className="font-mono text-[11px] text-fog border border-line rounded-md px-1.5 py-0.5">HUB</span>
-        </div>
-        <form action="/auth/signout" method="post" className="flex items-center gap-2 sm:gap-4">
-          {isAdmin && <Link href="/admin" className="btn btn-ghost btn-sm text-mint">Admin</Link>}
-          <Link href="/conta" className="btn btn-ghost btn-sm">Minha conta</Link>
-          <span className="text-xs text-fog hidden sm:block">{user?.email}</span>
-          <button className="btn btn-ghost btn-sm"><I.logout className="w-3.5 h-3.5" />Sair</button>
-        </form>
-      </header>
+      <TopBar />
 
       <section className="px-5 md:px-10 pt-10 pb-8 max-w-6xl mx-auto">
         <p className="font-mono text-xs text-mint tracking-widest uppercase rise">{greet} · {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}</p>

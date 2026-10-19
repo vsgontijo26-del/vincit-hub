@@ -106,7 +106,7 @@ export default function Login() {
           <p className="font-display text-5xl font-extrabold leading-[1.02] tracking-tight max-w-md">
             Uma central para criar, vender e <span className="text-mint">entregar</span>.
           </p>
-          <p className="text-fog mt-5 max-w-sm">CREATOR para conteúdo estratégico. GESTOR para operar a produtora. Tudo no mesmo lugar.</p>
+          <p className="text-fog mt-5 max-w-sm">Creator para conteúdo estratégico. Gestor para operar a produtora. Tudo no mesmo lugar.</p>
         </div>
         <p className="text-xs text-fog font-mono">VINCIT HUB · v0.1</p>
       </section>

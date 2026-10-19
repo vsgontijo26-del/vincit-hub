@@ -17,5 +17,5 @@ const items = [
 ];
 
 export default function CreatorNav() {
-  return <HubNav title="CREATOR" root="/creator" items={items} />;
+  return <HubNav title="Creator" desc="Conteúdo e crescimento no Instagram" root="/creator" items={items} />;
 }
