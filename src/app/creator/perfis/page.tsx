@@ -31,7 +31,7 @@ export default function Perfis() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 01 BASE" title="Perfis" desc="A base de tudo: conecte perfis pela Meta (ou cadastre manualmente). Depois preencha o Briefing de cada um para a IA criar com intenção.">
+      <PageHead kicker="CREATOR · BASE" title="Perfis" desc="A base de tudo: conecte perfis pela Meta (ou cadastre manualmente). Depois preencha o Briefing de cada um para a IA criar com intenção.">
         <button className="btn btn-ghost" onClick={() => setShow(!show)}><I.plus className="w-4 h-4" />Manual</button>
         <a href="/api/meta/connect" className="btn btn-mint"><I.camera className="w-4 h-4" />Conectar via Meta</a>
       </PageHead>

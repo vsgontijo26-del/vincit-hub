@@ -4,6 +4,7 @@ import { AGENTS } from "@/lib/agents";
 import { FORMATS, CATS, MIDIAS, FORMAT_MIDIA, formatBrief } from "@/lib/formats";
 import { EXAMPLES } from "@/lib/formats-examples";
 import { BRIEFING, briefingText } from "@/lib/briefing";
+import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 300;
 
@@ -88,6 +89,27 @@ export async function POST(req: Request) {
         prompt: `${ctx}\nTema: ${data.topic}\nFormato de entrega: ${data.format || "qualquer"}\n\nBiblioteca de cartas (número. nome (categoria) [mídias]: essência):\n${formatBrief(data.format ? FORMAT_MIDIA[data.format] : undefined)}\n\nEscolha 3 combinações diferentes de 2 ou 3 cartas que deixariam esse tema original e fora do padrão. Misture categorias (ex.: um gancho + uma estrutura + um recurso visual). Responda em markdown, para cada combinação:\n### Combinação N: nome curto\n**Cartas:** número e nome de cada\n**Ideia:** 2-3 frases descrevendo o vídeo/post\n**Gancho:** frase pronta\nNo fim, 1 linha dizendo qual das 3 você gravaria primeiro e por quê.`,
       });
       return NextResponse.json({ text });
+    }
+
+    if (task === "growth_plan") {
+      const sb = await createClient();
+      const { data: posts } = data.account?.id ? await sb.from("ig_posts").select("posted_at,media_type,like_count,comments_count,reach,saved,shares,plays,caption").eq("account_id", data.account.id).order("posted_at", { ascending: false }).limit(40) : { data: [] as any[] };
+      const text = await callClaude({
+        maxTokens: 8000,
+        prompt: `${ctx}\nSeguidores atuais: ${data.account?.followers_count ?? "não informado"}\nMeta definida pelo usuário: ${data.goal || "não informada (proponha uma meta realista)"}\nHorizonte: ${data.horizon || 90} dias\nTempo/recursos disponíveis: ${data.resources || "ver briefing"}\nÚltimos posts:\n${postsTable(posts || []) || "(sem métricas sincronizadas)"}\n\nMonte uma ESTRATÉGIA DE CRESCIMENTO para este perfil do Instagram. Seja específico ao briefing; não invente números de resultados (estimativas devem ser marcadas como estimativa). Responda SOMENTE com JSON:\n{\n "diagnostico": "situação atual em 3-4 frases, citando dados quando houver",\n "posicionamento": "frase de posicionamento recomendada",\n "meta": {"principal": "meta SMART", "kpis": [{"nome": "...", "atual": "... ou ?", "alvo": "...", "como_medir": "..."}]},\n "alavancas": [{"nome": "Conteúdo|Perfil|Comunidade|Collabs|Automação|Anúncios|Outra", "acao": "...", "impacto": "alto|medio|baixo", "esforco": "alto|medio|baixo"}],\n "fases": [{"titulo": "Dias 1-30: ...", "foco": "...", "acoes": [{"id": "a1", "texto": "ação concreta e verificável"}]}],\n "cadencia": {"semana": "ex.: 3 Reels + 2 carrosséis + stories diários", "mix": "prova/ensino/opinião/história/oferta em %", "melhores_formatos": ["..."]},\n "series": [{"nome": "quadro recorrente", "ideia": "...", "frequencia": "..."}],\n "rotina_diaria": ["checklist de 15-20 min/dia"],\n "riscos": ["..."]\n}\nUse 3 fases (30/60/90 ou proporcional ao horizonte), 5-8 ações por fase, ids únicos.`,
+      });
+      return NextResponse.json(extractJson(text));
+    }
+
+    if (task === "content_calendar") {
+      const days = data.period === "mes" ? 30 : 7;
+      const start = data.start || new Date().toISOString().slice(0, 10);
+      const cards = FORMATS.filter((f) => !data.formats?.includes("YouTube") || f.fmt.includes("longo")).map((f) => `${f.id}: ${f.name}`).join(", ");
+      const text = await callClaude({
+        maxTokens: data.period === "mes" ? 12000 : 6000,
+        prompt: `${ctx}\nCrie o calendário de conteúdo de ${days} dias começando em ${start} (datas no formato AAAA-MM-DD).\nFrequência desejada: ${data.frequency || "ver briefing"}\nFormatos prioritários: ${(data.formats || []).join(", ") || "ver briefing"}\nFoco do período: ${data.focus || "crescimento e autoridade"}\n${data.strategy ? `Estratégia vigente:\n${data.strategy}\n` : ""}Equilibre o mix (prova, ensino, opinião, história, oferta — no máximo 1 oferta a cada 5), use os pilares do briefing, varie as cartas de formatos criativos e considere datas sazonais do período.\nCartas disponíveis (id: nome): ${cards}\n\nResponda SOMENTE com JSON: {"logica": "2 frases sobre a lógica do período", "posts": [{"data": "AAAA-MM-DD", "formato": "Reels|Carrossel|Stories|YouTube|Foto", "pilar": "...", "tipo": "prova|ensino|opiniao|historia|oferta", "titulo": "tema em até 80 caracteres", "gancho": "frase de abertura", "carta": "id da carta", "roteiro": "3-5 linhas com a estrutura do conteúdo", "cta": "um único CTA"}]}`,
+      });
+      return NextResponse.json(extractJson(text));
     }
 
     if (task === "briefing_draft") {

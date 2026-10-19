@@ -15,7 +15,7 @@ export default function Automacoes() {
   const go = (t: Tab) => { setTab(t); const u = new URL(location.href); u.searchParams.set("tab", t); history.replaceState(null, "", u); };
   return (
     <>
-      <PageHead kicker="CREATOR · 04 EXECUÇÃO" title="Automações" desc="Conversas automáticas no direct no estilo ManyChat e agenda de publicações no estilo Business Suite, direto no seu Instagram." />
+      <PageHead kicker="CREATOR · 03 CRESCIMENTO" title="Automações" desc="Conversas automáticas no direct no estilo ManyChat e agenda de publicações no estilo Business Suite, direto no seu Instagram." />
       <div className="flex gap-1 border-b border-line mb-6 overflow-x-auto">{TABS.map(([k, l]) => <button key={k} onClick={() => go(k)} className={`px-4 py-2.5 text-sm whitespace-nowrap border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>
       {tab === "fluxos" && <FlowBuilder />}
       {tab === "agendar" && <PostScheduler />}

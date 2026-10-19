@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 const hubs = [
   {
     key: "creator", name: "CREATOR", href: "/creator", status: "Ativo",
-    desc: "Conteúdo para Instagram em 4 etapas: base, análise, criação e execução.",
-    items: ["Perfis", "Briefing", "Desempenho", "Tendências", "Referências", "Formatos criativos", "Laboratório", "Planejador", "Automações"],
+    desc: "Análise do perfil, criação e planejamento de conteúdo e estratégia de crescimento.",
+    items: ["Briefing", "Desempenho & insights", "Tendências", "Referências", "Formatos criativos", "Laboratório", "Planejador", "Estratégia", "Automações"],
     Icon: I.camera,
   },
   {

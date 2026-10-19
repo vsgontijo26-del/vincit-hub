@@ -24,7 +24,7 @@ export default function Laboratorio() {
   }
   return (
     <>
-      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Laboratório" desc="Onde a ideia vira conteúdo: crie com IA, chame um especialista para tarefas pontuais e revise antes de postar." />
+      <PageHead kicker="CREATOR · 02 CRIAÇÃO" title="Laboratório" desc="Onde a ideia vira conteúdo: crie com IA, chame um especialista para tarefas pontuais e revise antes de postar." />
       <div className="grid grid-cols-3 gap-2 mb-6">
         {TABS.map((t, i) => (
           <button key={t.k} onClick={() => go(t.k)} className={`text-left rounded-xl border p-3 md:p-4 transition-colors ${tab === t.k ? "border-mint bg-mint/10" : "border-line bg-panel hover:border-slate"}`}>

@@ -10,7 +10,7 @@ export default async function Desempenho() {
   if (accounts?.length === 1) redirect(`/creator/desempenho/${accounts[0].id}`);
   return (
     <>
-      <PageHead kicker="CREATOR · 02 ANÁLISE" title="Desempenho" desc="Métricas, posts fora da curva e diagnóstico de cada perfil." />
+      <PageHead kicker="CREATOR · 01 ANÁLISE" title="Desempenho" desc="Métricas, posts fora da curva e diagnóstico de cada perfil." />
       {!accounts?.length ? (
         <div className="card p-10 text-center">
           <p className="font-display text-xl font-bold">Nenhum perfil cadastrado</p>

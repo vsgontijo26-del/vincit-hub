@@ -56,7 +56,7 @@ export default function Referencias() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 02 ANÁLISE" title="Referências" desc="Estude perfis inteiros e posts que funcionaram. A IA desmonta o que dá certo e adapta para o seu briefing." />
+      <PageHead kicker="CREATOR · 01 ANÁLISE" title="Referências" desc="Estude perfis inteiros e posts que funcionaram. A IA desmonta o que dá certo e adapta para o seu briefing." />
       <div className="flex gap-1 border-b border-line mb-6">{([["perfis", "Perfis (roube como um artista)"], ["posts", "Posts que funcionaram"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 text-sm border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>
       {tab === "perfis" ? <RefProfiles /> : <>
 

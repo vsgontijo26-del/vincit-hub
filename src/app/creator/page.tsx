@@ -29,15 +29,15 @@ export default async function Overview() {
   ];
 
   const flow = [
-    { n: "01", t: "Base", d: "Perfis conectados e o briefing: negócio, público, mercado e estilo.", links: [["Perfis", "/creator/perfis"], ["Briefing", "/creator/briefing"]] },
-    { n: "02", t: "Análise", d: "O que funciona no seu perfil e no mercado.", links: [["Desempenho", "/creator/desempenho"], ["Tendências", "/creator/tendencias"], ["Referências", "/creator/referencias"]] },
-    { n: "03", t: "Criação", d: "Da ideia ao roteiro testado.", links: [["Formatos criativos", "/creator/formatos"], ["Laboratório", "/creator/laboratorio"]] },
-    { n: "04", t: "Execução", d: "Planejar, publicar e automatizar.", links: [["Planejador", "/creator/pauta"], ["Automações", "/creator/automacoes"]] },
+    { n: "00", t: "Base", d: "Perfis conectados e o briefing: negócio, público, mercado e estilo.", links: [["Perfis", "/creator/perfis"], ["Briefing", "/creator/briefing"]] },
+    { n: "01", t: "Análise & insights", d: "Dados do perfil, tendências e referências para decidir melhor.", links: [["Desempenho & insights", "/creator/desempenho"], ["Tendências", "/creator/tendencias"], ["Referências", "/creator/referencias"]] },
+    { n: "02", t: "Criação & planejamento", d: "Da ideia ao calendário da semana ou do mês.", links: [["Formatos criativos", "/creator/formatos"], ["Laboratório", "/creator/laboratorio"], ["Planejador", "/creator/pauta"]] },
+    { n: "03", t: "Crescimento", d: "Estratégia 30/60/90 e automações que trabalham por você.", links: [["Estratégia", "/creator/estrategia"], ["Automações", "/creator/automacoes"]] },
   ];
 
   return (
     <>
-      <PageHead kicker="CREATOR" title="Visão geral" desc="Base → análise → criação → execução. Seu fluxo de conteúdo em um só lugar." />
+      <PageHead kicker="CREATOR" title="Visão geral" desc="Analisar o perfil, criar e planejar o conteúdo e crescer com estratégia — tudo a partir do briefing." />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {kpis.map(([k, v], i) => (

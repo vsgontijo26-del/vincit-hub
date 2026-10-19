@@ -32,7 +32,7 @@ export default function Tendencias() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 02 ANÁLISE" title="Tendências" desc="A IA pesquisa na web o que está em alta agora no seu nicho e transforma em pautas aplicáveis." />
+      <PageHead kicker="CREATOR · 01 ANÁLISE" title="Tendências" desc="A IA pesquisa na web o que está em alta agora no seu nicho e transforma em pautas aplicáveis." />
       <form onSubmit={go} className="card p-5 grid md:grid-cols-4 gap-4 mb-8">
         <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={accountId} onChange={setAccountId} /></div>
         <div><label className="label">Nicho / tema</label><input required className="input" value={f.niche} onChange={(e) => setF({ ...f, niche: e.target.value })} placeholder="produção audiovisual para marcas" /></div>

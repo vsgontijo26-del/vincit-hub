@@ -83,14 +83,14 @@ export default function Briefing() {
 
   if (!loading && !accounts.length) return (
     <>
-      <PageHead kicker="CREATOR · 01 BASE" title="Briefing" desc="O DNA de cada perfil para a IA criar com intenção." />
+      <PageHead kicker="CREATOR · BASE" title="Briefing" desc="O DNA de cada perfil para a IA criar com intenção." />
       <div className="card p-10 text-center"><p className="font-display text-xl font-bold">Cadastre um perfil primeiro</p><Link href="/creator/perfis" className="btn btn-mint mt-5 inline-flex">Ir para Perfis <I.arrow className="w-4 h-4" /></Link></div>
     </>
   );
 
   return (
     <>
-      <PageHead kicker="CREATOR · 01 BASE" title="Briefing" desc="O DNA de cada perfil: negócio, público, mercado, estilo e recursos. Tudo que for preenchido aqui entra automaticamente nas análises, tendências, referências, formatos e no Laboratório." />
+      <PageHead kicker="CREATOR · BASE" title="Briefing" desc="O DNA de cada perfil: negócio, público, mercado, estilo e recursos. Tudo que for preenchido aqui entra automaticamente nas análises, tendências, referências, formatos e no Laboratório." />
 
       <div className="card p-4 mb-5 flex flex-wrap items-center gap-3">
         <select className="input !w-auto" value={accId} onChange={(e) => setAccId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select>

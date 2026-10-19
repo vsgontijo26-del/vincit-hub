@@ -61,7 +61,7 @@ export default function Formatos() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 03 CRIAÇÃO" title="Formatos criativos" desc={`${FORMATS.length} cartas de ideação, ganchos, copy, storytelling, formatos de vídeo, cinema e estratégia para fugir do mais do mesmo. Estude o porquê, aplique ao seu tema com a IA e combine cartas.`} />
+      <PageHead kicker="CREATOR · 02 CRIAÇÃO" title="Formatos criativos" desc={`${FORMATS.length} cartas de ideação, ganchos, copy, storytelling, formatos de vídeo, cinema e estratégia para fugir do mais do mesmo. Estude o porquê, aplique ao seu tema com a IA e combine cartas.`} />
 
       <div className="card p-4 mb-5 flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-[200px]">
