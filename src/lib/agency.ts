@@ -37,12 +37,30 @@ export const EVENT_KINDS = [
 export const PROPOSAL_STATUS: Record<string, string> = { rascunho: "Rascunho", enviada: "Enviada", visualizada: "Visualizada", aceita: "Aceita", recusada: "Recusada" };
 export const DEFAULT_ONBOARDING = ["Contrato assinado", "Briefing preenchido", "Acesso a materiais e marca", "Grupo de comunicação criado", "Cronograma alinhado", "Pagamento de entrada recebido"];
 
-export type Item = { name: string; category?: string; unit?: string; qty: number; days?: number; price: number; cost?: number };
+export type Item = { name: string; category?: string; unit?: string; qty: number; days?: number; price: number; cost?: number; final?: boolean; tax?: number; service_id?: string };
 export function calcProposal(items: Item[], margin = 0, tax = 0, discount = 0) {
-  const base = items.reduce((a, i) => a + (Number(i.qty) || 0) * (Number(i.days) || 1) * (Number(i.price) || 0), 0);
-  const cost = items.reduce((a, i) => a + (Number(i.qty) || 0) * (Number(i.days) || 1) * (Number(i.cost) || 0), 0);
+  // itens "fechados" (serviços do catálogo) já vêm com preço final: não recebem margem nem imposto de novo
+  const open = items.filter((i: any) => !i.final), closed = items.filter((i: any) => i.final);
+  const line = (i: any, k: "price" | "cost") => (Number(i.qty) || 0) * (Number(i.days) || 1) * (Number(i[k]) || 0);
+  const base = open.reduce((a, i) => a + line(i, "price"), 0);
+  const closedTotal = closed.reduce((a, i) => a + line(i, "price"), 0);
+  const closedTax = closed.reduce((a, i: any) => a + line(i, "price") * (Number(i.tax) || 0) / 100, 0);
+  const cost = items.reduce((a, i) => a + line(i, "cost"), 0);
   const withMargin = base * (1 + (Number(margin) || 0) / 100);
   const withTax = withMargin / (1 - Math.min(Number(tax) || 0, 90) / 100);
-  const total = Math.max(0, withTax - (Number(discount) || 0));
-  return { base, cost, marginValue: withMargin - base, taxValue: withTax - withMargin, total, profit: total - cost - (withTax - withMargin) };
+  const taxValue = withTax - withMargin + closedTax;
+  const total = Math.max(0, withTax + closedTotal - (Number(discount) || 0));
+  return { base: base + closedTotal, cost, marginValue: withMargin - base, taxValue, total, profit: total - cost - taxValue };
+}
+
+/** Preço de um serviço do catálogo a partir da composição de custos */
+export function calcService(items: Item[], margin = 0, tax = 0, fixed?: number | null) {
+  const line = (i: any, k: "price" | "cost") => (Number(i.qty) || 0) * (Number(i.days) || 1) * (Number(i[k]) || 0);
+  const base = items.reduce((a, i) => a + line(i, "price"), 0);
+  const cost = items.reduce((a, i) => a + line(i, "cost"), 0);
+  const suggested = (base * (1 + (Number(margin) || 0) / 100)) / (1 - Math.min(Number(tax) || 0, 90) / 100);
+  const price = fixed != null && Number(fixed) > 0 ? Number(fixed) : suggested;
+  const taxValue = price * (Number(tax) || 0) / 100;
+  const profit = price - cost - taxValue;
+  return { base, cost, suggested, price, taxValue, profit, profitPct: price ? (profit / price) * 100 : 0 };
 }

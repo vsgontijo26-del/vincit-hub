@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { PROPOSAL_STATUS, brl, calcProposal, type Item } from "@/lib/agency";
+import { PROPOSAL_STATUS, brl, calcProposal, calcService, type Item } from "@/lib/agency";
 import { useAI } from "@/lib/useAI";
 import CopyButton from "@/components/CopyButton";
 import { I } from "@/components/icons";
@@ -17,6 +17,7 @@ export default function Proposta() {
   const [p, setP] = useState<any>(null);
   const [clients, setClients] = useState<any[]>([]);
   const [prices, setPrices] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [saved, setSaved] = useState(true);
   const [msg, setMsg] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
@@ -30,13 +31,26 @@ export default function Proposta() {
       s.from("ag_proposals").select("*").eq("id", id).single(),
       s.from("ag_clients").select("id,name,company,segment").order("name"),
       s.from("ag_price_items").select("*").order("category").order("name"),
-    ]).then(([a, b, c]) => { setP(a.data); setClients(b.data || []); setPrices(c.data || []); });
+      s.from("ag_services").select("*").eq("active", true).order("position"),
+    ]).then(([a, b, c, d]) => { setP(a.data); setClients(b.data || []); setPrices(c.data || []); setServices(d.data || []); });
   }, [id]);
 
   const items: Item[] = p?.items || [];
   const calc = useMemo(() => calcProposal(items, p?.margin, p?.tax, p?.discount), [p]);
   const upd = (v: any) => { setP({ ...p, ...v }); setSaved(false); };
   const setItem = (i: number, v: Partial<Item>) => upd({ items: items.map((x, j) => (j === i ? { ...x, ...v } : x)) });
+  function addService(id: string) {
+    const sv = services.find((x) => x.id === id); if (!sv) return;
+    const c = calcService(sv.items || [], sv.margin, sv.tax, sv.fixed_price);
+    const add = (cur: string | null, txt: string | null) => (txt ? (cur ? `${cur}\n\n${txt}` : txt) : cur);
+    upd({
+      items: [...items, { name: sv.name, unit: "pacote", qty: 1, days: 1, price: Math.round(c.price * 100) / 100, cost: Math.round(c.cost * 100) / 100, final: true, tax: Number(sv.tax) || 0, service_id: sv.id }],
+      title: p.title && p.title !== "Nova proposta" ? p.title : sv.name,
+      scope: add(p.scope, sv.description ? `${sv.name}: ${sv.description}` : null),
+      deliverables: add(p.deliverables, sv.deliverables),
+      timeline: p.timeline || (sv.deadline_days ? `Entrega em até ${sv.deadline_days} dias após a aprovação e o recebimento dos materiais.` : p.timeline),
+    });
+  }
 
   async function save(extra: any = {}) {
     const row = { ...p, ...extra, total: Math.round(calc.total * 100) / 100 };
@@ -99,9 +113,12 @@ export default function Proposta() {
           </section>
 
           <section className="card p-5">
-            <div className="flex items-center justify-between mb-4"><h2 className="font-display font-bold text-lg">Calculadora de orçamento</h2>
+            <div className="flex flex-wrap items-center gap-2 justify-between mb-4"><h2 className="font-display font-bold text-lg mr-auto">Calculadora de orçamento</h2>
+              <select className="input !w-auto border-mint-dim" value="" onChange={(e) => addService(e.target.value)}>
+                <option value="">+ Serviço do catálogo</option>{services.map((x) => <option key={x.id} value={x.id}>{x.name} · {brl(calcService(x.items || [], x.margin, x.tax, x.fixed_price).price)}</option>)}
+              </select>
               <select className="input !w-auto" value="" onChange={(e) => { const pr = prices.find((x) => x.id === e.target.value); if (pr) upd({ items: [...items, { name: pr.name, category: pr.category, unit: pr.unit, qty: 1, days: 1, price: Number(pr.price), cost: Number(pr.cost || 0) }] }); }}>
-                <option value="">+ Da tabela de preços</option>{prices.map((x) => <option key={x.id} value={x.id}>{x.category} · {x.name} ({brl(x.price)}/{x.unit})</option>)}
+                <option value="">+ Insumo</option>{prices.map((x) => <option key={x.id} value={x.id}>{x.category} · {x.name} ({brl(x.price)}/{x.unit})</option>)}
               </select></div>
             <div className="overflow-x-auto scroll-thin">
               <table className="w-full text-sm min-w-[620px]">
@@ -109,7 +126,7 @@ export default function Proposta() {
                 <tbody>
                   {items.map((it, i) => (
                     <tr key={i} className="align-top">
-                      <td className="pr-2 pb-2"><input className="input !py-2" value={it.name} onChange={(e) => setItem(i, { name: e.target.value })} /></td>
+                      <td className="pr-2 pb-2"><input className="input !py-2" value={it.name} onChange={(e) => setItem(i, { name: e.target.value })} />{it.final && <p className="text-[10px] text-mint mt-0.5">Serviço do catálogo · preço final (sem margem/imposto extra)</p>}</td>
                       <td className="pr-2 pb-2 w-24"><select className="input !py-2" value={it.unit || "unidade"} onChange={(e) => setItem(i, { unit: e.target.value })}>{UNITS.map((u) => <option key={u}>{u}</option>)}</select></td>
                       <td className="pr-2 pb-2 w-16"><input type="number" className="input !py-2" value={it.qty} onChange={(e) => setItem(i, { qty: Number(e.target.value) })} /></td>
                       <td className="pr-2 pb-2 w-16"><input type="number" className="input !py-2" value={it.days ?? 1} onChange={(e) => setItem(i, { days: Number(e.target.value) })} /></td>

@@ -34,8 +34,8 @@ export default function PriceTable() {
       <p className="text-xs text-fog mb-4">Dados da produtora, meta e padrões de margem e impostos ficam em <Link href="/conta" className="text-mint hover:underline">Minha conta</Link>.</p>
       <div>
         <section id="precos" className="card p-5">
-          <div className="flex items-center justify-between mb-1"><h2 className="font-display font-bold text-lg">Tabela de preços</h2>{!prices.rows.length && <button onClick={seed} className="btn btn-ghost btn-sm"><I.spark className="w-3.5 h-3.5" />Carregar tabela sugerida</button>}</div>
-          <p className="text-xs text-fog mb-4">Itens usados na calculadora de orçamento. O custo é interno (cachê pago, aluguel) e serve para calcular seu lucro.</p>
+          <div className="flex items-center justify-between mb-1"><h2 className="font-display font-bold text-lg">Insumos</h2>{!prices.rows.length && <button onClick={seed} className="btn btn-ghost btn-sm"><I.spark className="w-3.5 h-3.5" />Carregar tabela sugerida</button>}</div>
+          <p className="text-xs text-fog mb-4">Peças que compõem os serviços: equipe, equipamentos, pós-produção, deslocamento… Preço = quanto você cobra por unidade; custo = quanto você paga (cachê, aluguel). Monte os pacotes na aba Serviços.</p>
           <div className="overflow-x-auto scroll-thin">
             <table className="w-full text-sm min-w-[520px]">
               <thead><tr className="text-left text-fog text-xs">{["Item", "Categoria", "Unidade", "Preço", "Custo", ""].map((h) => <th key={h} className="pb-2 pr-2 font-normal">{h}</th>)}</tr></thead>
