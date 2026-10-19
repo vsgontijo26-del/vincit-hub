@@ -7,6 +7,7 @@ import { useAI } from "@/lib/useAI";
 import PageHead from "@/components/PageHead";
 import CopyButton from "@/components/CopyButton";
 import { I } from "@/components/icons";
+import RefProfiles from "@/components/creator/RefProfiles";
 
 const empty = { title: "", url: "", handle: "", format: "Reels", content: "", tags: "", views: "", followers: "", median_views: "" };
 const num = (v: string) => (v ? Number(String(v).replace(/\D/g, "")) || null : null);
@@ -25,6 +26,7 @@ export default function Referencias() {
   const [open, setOpen] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const ai = useAI();
+  const [tab, setTab] = useState<"perfis" | "posts">("perfis");
 
   const load = useCallback(async () => {
     const { data } = await createClient().from("references_lib").select("*").order("created_at", { ascending: false });
@@ -54,7 +56,9 @@ export default function Referencias() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 02 ANÁLISE" title="Referências" desc="Cole a legenda, transcrição ou descrição de um conteúdo que performou. A IA desmonta o gancho, a estrutura e gera um modelo de copy reutilizável." />
+      <PageHead kicker="CREATOR · 02 ANÁLISE" title="Referências" desc="Estude perfis inteiros e posts que funcionaram. A IA desmonta o que dá certo e adapta para o seu briefing." />
+      <div className="flex gap-1 border-b border-line mb-6">{([["perfis", "Perfis (roube como um artista)"], ["posts", "Posts que funcionaram"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 text-sm border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>
+      {tab === "perfis" ? <RefProfiles /> : <>
 
       <form onSubmit={analyze} className="card p-5 grid md:grid-cols-3 gap-4 mb-8">
         <div><label className="label">Título</label><input required className="input" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Reels bastidores com 2M views" /></div>
@@ -112,6 +116,7 @@ export default function Referencias() {
         })}
         {!filtered.length && <p className="text-fog text-sm text-center py-8">Nenhuma referência ainda.</p>}
       </div>
+      </>}
     </>
   );
 }
