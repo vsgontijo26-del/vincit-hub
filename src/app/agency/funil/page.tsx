@@ -51,7 +51,7 @@ export default function Funil() {
 
   return (
     <>
-      <PageHead kicker="AGENCY · 02 COMERCIAL" title="Funil de vendas" desc="Acompanhe cada oportunidade do primeiro contato ao fechamento.">
+      <PageHead kicker="GESTOR · 02 COMERCIAL" title="Funil de vendas" desc="Acompanhe cada oportunidade do primeiro contato ao fechamento.">
         <button className="btn btn-mint" onClick={() => setForm({ stage: "lead" })}><I.plus className="w-4 h-4" />Nova oportunidade</button>
       </PageHead>
       <div className="grid grid-cols-3 gap-3 mb-5">

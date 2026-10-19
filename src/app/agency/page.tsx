@@ -57,7 +57,7 @@ export default async function AgencyHome() {
 
   return (
     <>
-      <PageHead kicker="AGENCY" title="Visão geral" desc={`Operação e caixa da produtora em ${monthName}.`} />
+      <PageHead kicker="GESTOR" title="Visão geral" desc={`Operação e caixa da produtora em ${monthName}.`} />
 
       <section className="card p-6 md:p-7 mb-5 relative overflow-hidden rise">
         <div className="absolute -right-24 -top-24 w-80 h-80 rounded-full bg-mint/10 blur-3xl" />

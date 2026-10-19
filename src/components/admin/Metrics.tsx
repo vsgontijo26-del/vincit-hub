@@ -105,7 +105,7 @@ export default function Metrics() {
           <h3 className="font-display font-bold">Ferramentas liberadas</h3>
           <p className="text-xs text-fog mb-3">Assinantes ativos com cada ferramenta no plano</p>
           {m.total === 0 ? <p className="text-sm text-fog">Ainda não há assinantes além de você.</p>
-            : toolRows.map((t) => <Bar key={t.key} label={`${t.hub === "creator" ? "CREATOR" : t.hub === "agency" ? "AGENCY" : "Geral"} · ${t.label}`} value={t.n} max={maxAccess} right={String(t.n)} />)}
+            : toolRows.map((t) => <Bar key={t.key} label={`${t.hub === "creator" ? "CREATOR" : t.hub === "agency" ? "GESTOR" : "Geral"} · ${t.label}`} value={t.n} max={maxAccess} right={String(t.n)} />)}
         </section>
       </div>
       <p className="text-[11px] text-fog">"Ativo" considera o último login. O uso conta registros criados por qualquer conta, inclusive a sua.</p>

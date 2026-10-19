@@ -1,6 +1,6 @@
 import AgencyNav from "@/components/agency/AgencyNav";
 
-export const metadata = { title: "AGENCY · VINCIT HUB" };
+export const metadata = { title: "GESTOR · VINCIT HUB" };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

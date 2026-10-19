@@ -16,7 +16,7 @@ const hubs = [
     Icon: I.camera,
   },
   {
-    key: "agency", name: "AGENCY", href: "/agency", status: "Ativo",
+    key: "agency", name: "GESTOR", href: "/agency", status: "Ativo",
     desc: "Gestão da produtora: operação, comercial e recursos.",
     items: ["Projetos", "Tarefas", "Agenda", "Clientes", "Funil", "Financeiro", "Propostas", "Equipe", "Equipamentos"],
     Icon: I.briefcase,

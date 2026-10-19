@@ -47,7 +47,7 @@ export default function Projetos() {
 
   return (
     <>
-      <PageHead kicker="AGENCY · 01 OPERAÇÃO" title="Projetos" desc="Do briefing à entrega. Arraste os cards entre as etapas; cada mudança fica registrada no histórico.">
+      <PageHead kicker="GESTOR · 01 OPERAÇÃO" title="Projetos" desc="Do briefing à entrega. Arraste os cards entre as etapas; cada mudança fica registrada no histórico.">
         <div className="flex rounded-lg border border-line overflow-hidden">{(["quadro", "lista"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-2 text-xs capitalize ${view === v ? "bg-mint text-black font-semibold" : "text-fog"}`}>{v}</button>)}</div>
         <button className="btn btn-mint" onClick={() => setForm({ stage: "briefing" })}><I.plus className="w-4 h-4" />Novo projeto</button>
       </PageHead>

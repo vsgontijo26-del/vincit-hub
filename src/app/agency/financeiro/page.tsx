@@ -94,7 +94,7 @@ export default function Financeiro() {
 
   return (
     <>
-      <PageHead kicker="AGENCY · 02 COMERCIAL" title="Financeiro" desc="Contas, cartões, categorias com orçamento, lançamentos recorrentes e parcelados, relatórios e cobranças com Pix para o cliente.">
+      <PageHead kicker="GESTOR · 02 COMERCIAL" title="Financeiro" desc="Contas, cartões, categorias com orçamento, lançamentos recorrentes e parcelados, relatórios e cobranças com Pix para o cliente.">
         <button className="btn btn-ghost" onClick={() => setForm({ kind: "saida", due_date: td, account_id: fin.accounts[0]?.id })}>− Despesa</button>
         <button className="btn btn-mint" onClick={() => setForm({ kind: "entrada", due_date: td, account_id: fin.accounts[0]?.id })}><I.plus className="w-4 h-4" />Receita</button>
       </PageHead>

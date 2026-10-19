@@ -36,7 +36,7 @@ export default function Equipamentos() {
 
   return (
     <>
-      <PageHead kicker="AGENCY · 03 RECURSOS" title="Equipamentos" desc="Inventário, reservas por projeto e manutenção.">
+      <PageHead kicker="GESTOR · 03 RECURSOS" title="Equipamentos" desc="Inventário, reservas por projeto e manutenção.">
         <button className="btn btn-mint" onClick={() => setForm({ status: "disponivel" })}><I.plus className="w-4 h-4" />Novo equipamento</button>
       </PageHead>
       <div className="grid grid-cols-3 gap-3 mb-5">

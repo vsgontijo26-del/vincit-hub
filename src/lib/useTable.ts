@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-/** CRUD genérico para as tabelas do AGENCY (RLS garante que só o dono vê). */
+/** CRUD genérico para as tabelas do GESTOR (RLS garante que só o dono vê). */
 export function useTable<T = any>(table: string, opts: { select?: string; order?: string; asc?: boolean; filter?: [string, any] } = {}) {
   const [rows, setRows] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
