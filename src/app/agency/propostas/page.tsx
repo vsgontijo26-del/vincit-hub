@@ -7,9 +7,12 @@ import { useTable } from "@/lib/useTable";
 import { PROPOSAL_STATUS, brl, dtShort } from "@/lib/agency";
 import PageHead from "@/components/PageHead";
 import { I } from "@/components/icons";
+import PriceTable from "@/components/agency/PriceTable";
 
 export default function Propostas() {
   const router = useRouter();
+  const [tab, setTab] = useState<"propostas" | "precos">("propostas");
+  useEffect(() => { if (new URLSearchParams(location.search).get("tab") === "precos") setTab("precos"); }, []);
   const p = useTable<any>("ag_proposals", { select: "id,title,total,status,created_at,accepted_at,viewed_at,ag_clients(name)" });
   const [busy, setBusy] = useState(false);
 
@@ -42,9 +45,10 @@ export default function Propostas() {
   return (
     <>
       <PageHead kicker="AGENCY · 03 COMERCIAL" title="Propostas & orçamentos" desc="Monte o orçamento com a calculadora, gere o texto com IA e envie um link para o cliente aceitar online.">
-        <Link href="/agency/config#precos" className="btn btn-ghost">Tabela de preços</Link>
         <button className="btn btn-mint" disabled={busy} onClick={() => create()}><I.plus className="w-4 h-4" />Nova proposta</button>
       </PageHead>
+      <div className="flex gap-1 border-b border-line mb-5">{([["propostas", "Propostas"], ["precos", "Tabela de preços"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 text-sm border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>
+      {tab === "precos" ? <PriceTable /> : <>
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[["Aguardando resposta", brl(sum(["enviada", "visualizada"]))], ["Aceitas", brl(sum(["aceita"]))], ["Taxa de aceite", sent ? Math.round((acc / sent) * 100) + "%" : "–"]].map(([k, v]) => (
           <div key={k} className="card p-4"><p className="text-xs text-fog">{k}</p><p className="font-display text-xl md:text-2xl font-bold mt-1">{v}</p></div>
@@ -67,6 +71,7 @@ export default function Propostas() {
         </table>
         {!p.rows.length && !p.loading && <p className="text-fog text-sm text-center py-10">Nenhuma proposta ainda.</p>}
       </div>
+      </>}
     </>
   );
 }

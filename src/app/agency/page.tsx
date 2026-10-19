@@ -65,7 +65,7 @@ export default async function AgencyHome() {
           <div>
             <p className="text-xs text-fog uppercase tracking-widest font-mono">Faturado no mês</p>
             <p className="font-display text-4xl md:text-5xl font-extrabold mt-2 tabular-nums">{brl(faturado)}</p>
-            <p className="text-sm text-fog mt-2">{goal ? <>Meta {brl(goal)} · faltam <span className="text-paper">{brl(Math.max(0, goal - faturado))}</span></> : <Link href="/agency/config" className="text-mint underline">Defina a meta mensal</Link>}</p>
+            <p className="text-sm text-fog mt-2">{goal ? <>Meta {brl(goal)} · faltam <span className="text-paper">{brl(Math.max(0, goal - faturado))}</span></> : <Link href="/conta" className="text-mint underline">Defina a meta mensal</Link>}</p>
           </div>
           <div className="relative w-36 h-36 shrink-0">
             <svg viewBox="0 0 128 128" className="w-full h-full -rotate-90">

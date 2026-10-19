@@ -6,7 +6,6 @@ import { I } from "@/components/icons";
 /* Fluxo operacional: base → análise → comercial → execução */
 const items = [
   { href: "/agency", label: "Visão geral", Icon: A.home },
-  { href: "/agency/config", label: "Configurações", Icon: A.gear, group: "01 · Base" },
   { href: "/agency/clientes", label: "Clientes", Icon: A.users, group: "01 · Base" },
   { href: "/agency/equipe", label: "Equipe", Icon: A.team, group: "01 · Base" },
   { href: "/agency/equipamentos", label: "Equipamentos", Icon: I.camera, group: "01 · Base" },

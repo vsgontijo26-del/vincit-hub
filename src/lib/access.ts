@@ -10,7 +10,6 @@ export const TOOLS: Tool[] = [
   { key: "creator:laboratorio", label: "Laboratório", hub: "creator", path: "/creator/laboratorio" },
   { key: "creator:planejador", label: "Planejador", hub: "creator", path: "/creator/pauta" },
   { key: "creator:automacoes", label: "Automações", hub: "creator", path: "/creator/automacoes" },
-  { key: "agency:config", label: "Configurações", hub: "agency", path: "/agency/config" },
   { key: "agency:clientes", label: "Clientes", hub: "agency", path: "/agency/clientes" },
   { key: "agency:equipe", label: "Equipe", hub: "agency", path: "/agency/equipe" },
   { key: "agency:equipamentos", label: "Equipamentos", hub: "agency", path: "/agency/equipamentos" },
@@ -24,7 +23,7 @@ export const TOOLS: Tool[] = [
 ];
 
 /** rotas antigas/aliases que pertencem a uma ferramenta */
-const ALIAS: [string, string][] = [["/creator/briefing", "creator:perfis"], ["/creator/copy", "creator:laboratorio"], ["/creator/agentes", "creator:laboratorio"]];
+const ALIAS: [string, string][] = [["/agency/config", "agency:propostas"], ["/creator/briefing", "creator:perfis"], ["/creator/copy", "creator:laboratorio"], ["/creator/agentes", "creator:laboratorio"]];
 
 export type Access = { role: "superadmin" | "user"; status: "ativo" | "pendente" | "suspenso" | "expirado"; tools: string[]; plan?: string | null; expires_at?: string | null; name?: string | null };
 
