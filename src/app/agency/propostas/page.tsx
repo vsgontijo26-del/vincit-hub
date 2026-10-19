@@ -44,7 +44,7 @@ export default function Propostas() {
 
   return (
     <>
-      <PageHead kicker="AGENCY · 03 COMERCIAL" title="Propostas & orçamentos" desc="Monte o orçamento com a calculadora, gere o texto com IA e envie um link para o cliente aceitar online.">
+      <PageHead kicker="AGENCY · 02 COMERCIAL" title="Propostas & orçamentos" desc="Monte o orçamento com a calculadora, gere o texto com IA e envie um link para o cliente aceitar online.">
         <button className="btn btn-mint" disabled={busy} onClick={() => create()}><I.plus className="w-4 h-4" />Nova proposta</button>
       </PageHead>
       <div className="flex gap-1 border-b border-line mb-5">{([["propostas", "Propostas"], ["precos", "Tabela de preços"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`px-4 py-2.5 text-sm border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>

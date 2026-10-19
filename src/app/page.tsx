@@ -17,8 +17,8 @@ const hubs = [
   },
   {
     key: "agency", name: "AGENCY", href: "/agency", status: "Ativo",
-    desc: "Gestão da produtora em 4 etapas: base, análise, comercial e execução.",
-    items: ["Clientes", "Equipe", "Equipamentos", "Financeiro", "Funil", "Propostas", "Projetos", "Tarefas", "Agenda"],
+    desc: "Gestão da produtora: operação, comercial e recursos.",
+    items: ["Projetos", "Tarefas", "Agenda", "Clientes", "Funil", "Financeiro", "Propostas", "Equipe", "Equipamentos"],
     Icon: I.briefcase,
   },
 ];

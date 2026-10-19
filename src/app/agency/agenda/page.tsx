@@ -155,7 +155,7 @@ export default function Agenda() {
 
   return (
     <>
-      <PageHead kicker="AGENCY · 04 EXECUÇÃO" title="Agenda" desc="Compromissos, tarefas com prazo, captações, entregas e recebimentos no mesmo calendário. Cada compromisso pode virar tarefa e se repetir.">
+      <PageHead kicker="AGENCY · 01 OPERAÇÃO" title="Agenda" desc="Compromissos, tarefas com prazo, captações, entregas e recebimentos no mesmo calendário. Cada compromisso pode virar tarefa e se repetir.">
         <button className="btn btn-mint" onClick={() => openNew(td)}><I.plus className="w-4 h-4" />Novo compromisso</button>
       </PageHead>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
