@@ -1,11 +1,11 @@
 "use client";
 // Renderizador de markdown simples (títulos, listas, negrito, links, código)
 function inline(s: string) {
-  let h = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  let h = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   h = h.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   h = h.replace(/(^|[^*])\*(?!\s)(.+?)\*/g, "$1<em>$2</em>");
   h = h.replace(/`([^`]+)`/g, "<code>$1</code>");
-  h = h.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+  h = h.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)&]+(?:&amp;[^\s)&]+)*)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
   return h;
 }
 export function toHtml(md: string) {

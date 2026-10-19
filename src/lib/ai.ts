@@ -11,6 +11,13 @@ Regras:
 - Quando houver "Voz da marca" no contexto, siga-a à risca.
 - Você conhece a biblioteca de formatos criativos do VINCIT HUB (ideação, ganchos, copy, estruturas narrativas, elementos de storytelling, formatos de vídeo, linguagem de cinema e estratégia — inclui as 32 cartas da Hannah Franklin e frameworks como AIDA, PAS, Story Circle, ABT, StoryBrand, Kuleshov, Hero-Hub-Help) e sugere a carta adequada quando ajuda.`;
 
+/** Cota diária de uso da IA por assinante (função ai_quota_hit no banco). Sem a função, libera. */
+export async function aiQuotaExceeded(supabase: any) {
+  const { data, error } = await supabase.rpc("ai_quota_hit");
+  return !error && data === false;
+}
+export const QUOTA_MSG = "Você atingiu o limite diário de uso da IA. Tente de novo amanhã.";
+
 export async function callClaude(opts: { prompt: string; webSearch?: boolean; maxTokens?: number }) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("A chave da IA (ANTHROPIC_API_KEY) ainda não foi configurada no Vercel.");

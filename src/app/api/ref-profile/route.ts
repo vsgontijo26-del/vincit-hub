@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { callClaude, extractJson } from "@/lib/ai";
+import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG } from "@/lib/ai";
 import { gget } from "@/lib/meta";
 import { briefingText } from "@/lib/briefing";
 import { FORMATS } from "@/lib/formats";
@@ -71,6 +71,7 @@ export async function POST(req: Request) {
     const p = parse(url || "");
     if (!p) throw new Error("Link não reconhecido. Use um perfil do Instagram (instagram.com/usuario) ou canal do YouTube (youtube.com/@canal).");
     const supabase = await createClient();
+    if (await aiQuotaExceeded(supabase)) return NextResponse.json({ error: QUOTA_MSG }, { status: 429 });
     const { data: me } = account_id ? await supabase.from("ig_accounts").select("*").eq("id", account_id).maybeSingle() : { data: null };
 
     let snap: Snap | null = null; let note = "";

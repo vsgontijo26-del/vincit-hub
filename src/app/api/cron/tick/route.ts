@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHash, timingSafeEqual } from "crypto";
 import { createAnonClient } from "@/lib/supabase/server";
 import { runFrom, log, publishStep } from "@/lib/flows";
 
@@ -7,7 +8,8 @@ export const maxDuration = 300;
 /** Chamado a cada minuto pelo agendador do banco (pg_cron): continua fluxos em espera e publica posts agendados */
 export async function POST(req: Request) {
   const secret = process.env.WEBHOOK_DB_SECRET!;
-  if (!secret || req.headers.get("x-cron-secret") !== secret) return new Response("forbidden", { status: 403 });
+  const h = (v: string) => createHash("sha256").update(v).digest();
+  if (!secret || !timingSafeEqual(h(req.headers.get("x-cron-secret") || ""), h(secret))) return new Response("forbidden", { status: 403 });
   const db = createAnonClient();
   const { data, error } = await db.rpc("wh_due", { p_secret: secret });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
