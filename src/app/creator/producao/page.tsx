@@ -6,7 +6,8 @@ import PageHead from "@/components/PageHead";
 import { I } from "@/components/icons";
 import ContentDrawer from "@/components/creator/ContentDrawer";
 import StatusSettings from "@/components/creator/StatusSettings";
-import { FORMAT_LIST, MAX_REVISIONS, blockers, isLate, shortDate, useContentStatuses } from "@/lib/content";
+import Link from "next/link";
+import { FORMAT_LIST, MAX_REVISIONS, origin, blockers, isLate, shortDate, useContentStatuses } from "@/lib/content";
 
 export default function Producao() {
   const { accounts } = useAccounts();
@@ -19,6 +20,7 @@ export default function Producao() {
   const [drag, setDrag] = useState<string | null>(null);
   const [warn, setWarn] = useState<{ title: string; list: string[] } | null>(null);
   const [cfg, setCfg] = useState(false);
+  const [view, setView] = useState<"quadro" | "lista">("quadro");
 
   const load = useCallback(async () => {
     const s = createClient();
@@ -59,6 +61,10 @@ export default function Producao() {
       </PageHead>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex bg-panel2 rounded-lg p-0.5">
+          {(["quadro", "lista"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1 text-sm rounded-md ${view === v ? "bg-ink text-mint" : "text-fog"}`}>{v === "quadro" ? "Quadro" : "Lista"}</button>)}
+          <Link href={`/creator/pauta${f.account ? `?perfil=${f.account}` : ""}`} className="px-3 py-1 text-sm rounded-md text-fog hover:text-paper">Calendário</Link>
+        </div>
         <select className="input !w-auto" value={f.account} onChange={(e) => setF({ ...f, account: e.target.value })}><option value="">Todos os perfis</option>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select>
         {clients.length > 0 && <select className="input !w-auto" value={f.client} onChange={(e) => setF({ ...f, client: e.target.value })}><option value="">Todos os clientes</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.company || c.name}</option>)}</select>}
         {assignees.length > 0 && <select className="input !w-auto" value={f.assignee} onChange={(e) => setF({ ...f, assignee: e.target.value })}><option value="">Todos os responsáveis</option>{assignees.map((a) => <option key={a}>{a}</option>)}</select>}
@@ -77,7 +83,30 @@ export default function Producao() {
         </div>
       )}
 
-      {!statuses.length ? <p className="text-fog">Carregando…</p> : (
+      {!statuses.length ? <p className="text-fog">Carregando…</p> : view === "lista" ? (
+        <div className="card overflow-x-auto scroll-thin">
+          <table className="w-full text-sm min-w-[760px]">
+            <thead><tr className="text-left text-[11px] text-fog uppercase border-b border-line">{["Conteúdo", "Status", "Formato", "Pilar", "Publicação", "Responsável", "Rev."].map((h) => <th key={h} className="px-3 py-2 font-normal">{h}</th>)}</tr></thead>
+            <tbody>
+              {[...shown].sort((a, b) => (statuses.find((x) => x.id === a.status_id)?.position ?? 0) - (statuses.find((x) => x.id === b.status_id)?.position ?? 0) || String(a.planned_for || "9").localeCompare(String(b.planned_for || "9"))).map((it) => {
+                const st = statuses.find((x) => x.id === it.status_id); const acc = accounts.find((a) => a.id === it.account_id); const lt = isLate(it, statuses);
+                return (
+                  <tr key={it.id} onClick={() => setSel(it)} className="border-b border-line/60 last:border-0 hover:bg-panel2 cursor-pointer">
+                    <td className="px-3 py-2"><p className="leading-snug">{it.title}</p><p className="text-[11px] text-fog">{acc ? `@${acc.username}` : "Sem perfil"}</p></td>
+                    <td className="px-3 py-2 whitespace-nowrap"><span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: st?.color }} />{st?.name}</span></td>
+                    <td className="px-3 py-2 text-fog">{it.format || "–"}</td>
+                    <td className="px-3 py-2 text-fog">{it.pillar || "–"}</td>
+                    <td className={`px-3 py-2 whitespace-nowrap ${lt ? "text-danger" : "text-fog"}`}>{it.planned_for ? `${lt ? "Atrasado · " : ""}${shortDate(it.planned_for)}` : "–"}</td>
+                    <td className="px-3 py-2 text-fog">{it.assignee || "–"}</td>
+                    <td className={`px-3 py-2 ${it.revisions > MAX_REVISIONS ? "text-danger" : "text-fog"}`}>{it.revisions || 0}</td>
+                  </tr>
+                );
+              })}
+              {!shown.length && <tr><td colSpan={7} className="px-3 py-6 text-center text-fog">Nenhum conteúdo com esses filtros.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      ) : (
         <div className="grid grid-flow-col auto-cols-[minmax(240px,1fr)] gap-3 overflow-x-auto scroll-thin pb-4">
           {statuses.map((c) => {
             const col = shown.filter((i) => i.status_id === c.id);
@@ -99,6 +128,7 @@ export default function Producao() {
                     return (
                       <div key={it.id} draggable onDragStart={() => setDrag(it.id)} onDragEnd={() => setDrag(null)} onClick={() => setSel(it)}
                         className={`bg-panel2 border rounded-xl p-3 cursor-grab hover:border-mint-dim active:cursor-grabbing ${lt ? "border-danger/50" : "border-line"}`}>
+                        {c.stage === "ideia" && origin(it) && <p className="text-[10px] text-mint mb-1">{origin(it)}</p>}
                         <p className="text-sm leading-snug">{it.title}</p>
                         <p className="text-[11px] text-fog mt-1 truncate">{acc ? `@${acc.username}` : "Sem perfil"}{cl ? ` · ${cl.company || cl.name}` : ""}</p>
                         <div className="flex flex-wrap gap-1 mt-2">

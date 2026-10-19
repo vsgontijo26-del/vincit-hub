@@ -50,6 +50,17 @@ export function blockers(it: any, statuses: any[], toId: string): string[] {
   return Array.from(out);
 }
 
+/** de onde a ideia veio (pelo tipo gravado por cada ferramenta) */
+export function origin(it: any): string | null {
+  const b = it.body || "";
+  if (it.kind === "tendencia") return "da Tendência";
+  if (it.kind === "plano") return "do plano com IA";
+  if (it.kind === "copy") return "do Laboratório";
+  if (it.kind === "diagnostico") return it.pillar ? `do Diagnóstico · ${it.pillar}` : "do Diagnóstico";
+  if (it.kind === "ideia" && /Baseado na referência|Inspirado em/.test(b)) return "da Referência";
+  return null;
+}
+
 export const today = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
 export const isLate = (it: any, statuses: any[]) => {
   const st = statuses.find((s) => s.id === it.status_id)?.stage;
