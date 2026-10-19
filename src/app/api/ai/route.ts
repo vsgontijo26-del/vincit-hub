@@ -3,6 +3,7 @@ import { callClaude, extractJson } from "@/lib/ai";
 import { AGENTS } from "@/lib/agents";
 import { FORMATS, CATS, MIDIAS, FORMAT_MIDIA, formatBrief } from "@/lib/formats";
 import { EXAMPLES } from "@/lib/formats-examples";
+import { BRIEFING, briefingText } from "@/lib/briefing";
 
 export const maxDuration = 300;
 
@@ -15,7 +16,7 @@ function postsTable(posts: any[]) {
 export async function POST(req: Request) {
   try {
     const { task, data } = await req.json();
-    const ctx = data?.account ? `Perfil: @${data.account.username}${data.account.niche ? ` | Nicho: ${data.account.niche}` : ""}${data.account.goals ? ` | Objetivos: ${data.account.goals}` : ""}${data.account.followers_count ? ` | Seguidores: ${data.account.followers_count}` : ""}${data.account.brand_voice ? `\nVoz da marca: ${data.account.brand_voice}` : ""}` : "";
+    const ctx = data?.account ? `Perfil: @${data.account.username}${data.account.niche ? ` | Nicho: ${data.account.niche}` : ""}${data.account.goals ? ` | Objetivos: ${data.account.goals}` : ""}${data.account.followers_count ? ` | Seguidores: ${data.account.followers_count}` : ""}${data.account.brand_voice ? `\nVoz da marca: ${data.account.brand_voice}` : ""}${data.account.briefing ? `\n${briefingText(data.account.briefing)}` : ""}` : "";
 
     if (task === "profile_diagnosis") {
       const text = await callClaude({
@@ -87,6 +88,15 @@ export async function POST(req: Request) {
         prompt: `${ctx}\nTema: ${data.topic}\nFormato de entrega: ${data.format || "qualquer"}\n\nBiblioteca de cartas (número. nome (categoria) [mídias]: essência):\n${formatBrief(data.format ? FORMAT_MIDIA[data.format] : undefined)}\n\nEscolha 3 combinações diferentes de 2 ou 3 cartas que deixariam esse tema original e fora do padrão. Misture categorias (ex.: um gancho + uma estrutura + um recurso visual). Responda em markdown, para cada combinação:\n### Combinação N: nome curto\n**Cartas:** número e nome de cada\n**Ideia:** 2-3 frases descrevendo o vídeo/post\n**Gancho:** frase pronta\nNo fim, 1 linha dizendo qual das 3 você gravaria primeiro e por quê.`,
       });
       return NextResponse.json({ text });
+    }
+
+    if (task === "briefing_draft") {
+      const schema = BRIEFING.flatMap((sec) => sec.fields).map((f) => `"${f.k}": ${f.type === "chips" || f.type === "multi" ? "string[]" : "string"} // ${f.l}${f.options ? ` (uma de: ${f.options.join(" / ")})` : ""}`).join("\n");
+      const text = await callClaude({
+        maxTokens: 3000,
+        prompt: `A partir do material abaixo, preencha o briefing estratégico de um perfil de Instagram. Use SOMENTE o que está no material ou é inferência direta e segura dele; deixe "" ou [] quando não houver informação. Nunca invente números, clientes ou resultados. Para campos com opções, use exatamente uma das opções.\n\nMaterial:\n"""${(data.text || "").slice(0, 12000)}"""\n\nResponda SOMENTE com JSON neste formato:\n{\n${schema}\n}`,
+      });
+      return NextResponse.json(extractJson(text));
     }
 
     if (task === "brand_voice") {

@@ -29,7 +29,7 @@ export default async function Overview() {
   ];
 
   const flow = [
-    { n: "01", t: "Base", d: "Perfis conectados, nicho, objetivos e voz da marca.", links: [["Perfis & marca", "/creator/perfis"]] },
+    { n: "01", t: "Base", d: "Perfis conectados e o briefing: negócio, público, mercado e estilo.", links: [["Perfis", "/creator/perfis"], ["Briefing", "/creator/briefing"]] },
     { n: "02", t: "Análise", d: "O que funciona no seu perfil e no mercado.", links: [["Desempenho", "/creator/desempenho"], ["Tendências", "/creator/tendencias"], ["Referências", "/creator/referencias"]] },
     { n: "03", t: "Criação", d: "Da ideia ao roteiro testado.", links: [["Formatos criativos", "/creator/formatos"], ["Laboratório", "/creator/laboratorio"]] },
     { n: "04", t: "Execução", d: "Planejar, publicar e automatizar.", links: [["Planejador", "/creator/pauta"], ["Automações", "/creator/automacoes"]] },

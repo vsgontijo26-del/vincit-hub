@@ -5,7 +5,8 @@ import { I } from "./icons";
 /* Fluxo operacional: base → análise → criação → execução */
 const items = [
   { href: "/creator", label: "Visão geral", Icon: I.grid },
-  { href: "/creator/perfis", label: "Perfis & marca", Icon: I.user, group: "01 · Base" },
+  { href: "/creator/perfis", label: "Perfis", Icon: I.user, group: "01 · Base" },
+  { href: "/creator/briefing", label: "Briefing", Icon: I.briefcase, group: "01 · Base" },
   { href: "/creator/desempenho", label: "Desempenho", Icon: I.chart, group: "02 · Análise" },
   { href: "/creator/tendencias", label: "Tendências", Icon: I.trend, group: "02 · Análise" },
   { href: "/creator/referencias", label: "Referências", Icon: I.bookmark, group: "02 · Análise" },

@@ -12,7 +12,7 @@ const hubs = [
   {
     key: "creator", name: "CREATOR", href: "/creator", status: "Ativo",
     desc: "Conteúdo para Instagram em 4 etapas: base, análise, criação e execução.",
-    items: ["Perfis & marca", "Desempenho", "Tendências", "Referências", "Formatos criativos", "Laboratório", "Planejador", "Automações"],
+    items: ["Perfis", "Briefing", "Desempenho", "Tendências", "Referências", "Formatos criativos", "Laboratório", "Planejador", "Automações"],
     Icon: I.camera,
   },
   {

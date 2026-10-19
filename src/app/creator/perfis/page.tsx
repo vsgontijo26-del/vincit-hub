@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAccounts, fmt } from "@/lib/useAccounts";
 import PageHead from "@/components/PageHead";
+import { briefingProgress } from "@/lib/briefing";
 import { I } from "@/components/icons";
 
 export default function Perfis() {
@@ -30,7 +31,7 @@ export default function Perfis() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 01 BASE" title="Perfis & marca" desc="A base de tudo: conecte perfis pela Meta (ou cadastre manualmente) e defina nicho, objetivos e voz da marca em Desempenho.">
+      <PageHead kicker="CREATOR · 01 BASE" title="Perfis" desc="A base de tudo: conecte perfis pela Meta (ou cadastre manualmente). Depois preencha o Briefing de cada um para a IA criar com intenção.">
         <button className="btn btn-ghost" onClick={() => setShow(!show)}><I.plus className="w-4 h-4" />Manual</button>
         <a href="/api/meta/connect" className="btn btn-mint"><I.camera className="w-4 h-4" />Conectar via Meta</a>
       </PageHead>
@@ -69,6 +70,7 @@ export default function Perfis() {
                 ))}
               </div>
               {a.niche && <p className="text-xs text-fog mt-4 truncate">Nicho: {a.niche}</p>}
+              <div className="mt-3"><div className="flex justify-between text-[11px] mb-1"><span className="text-fog">Briefing</span><span className={briefingProgress(a.briefing) >= 70 ? "text-mint font-mono" : "text-fog font-mono"}>{briefingProgress(a.briefing)}%</span></div><div className="h-1 bg-panel2 rounded-full overflow-hidden"><div className="h-full bg-mint" style={{ width: `${briefingProgress(a.briefing)}%` }} /></div></div>
             </Link>
           ))}
         </div>
