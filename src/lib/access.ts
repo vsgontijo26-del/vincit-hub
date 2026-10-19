@@ -24,7 +24,7 @@ export const TOOLS: Tool[] = [
 ];
 
 /** rotas antigas/aliases que pertencem a uma ferramenta */
-const ALIAS: [string, string][] = [["/agency/config", "agency:propostas"], ["/creator/briefing", "creator:perfis"], ["/creator/copy", "creator:laboratorio"], ["/creator/agentes", "creator:laboratorio"]];
+const ALIAS: [string, string][] = [["/agency/config", "agency:propostas"], ["/creator/briefing", "creator:perfis"], ["/creator/copy", "creator:laboratorio"], ["/creator/agentes", "creator:laboratorio"], ["/creator/diagnostico", "creator:estrategia"]];
 
 export type Access = { role: "superadmin" | "user"; status: "ativo" | "pendente" | "suspenso" | "expirado"; tools: string[]; plan?: string | null; expires_at?: string | null; name?: string | null };
 

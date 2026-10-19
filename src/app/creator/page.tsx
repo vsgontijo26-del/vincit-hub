@@ -32,7 +32,7 @@ export default async function Overview() {
     { n: "00", t: "Base", d: "Perfis conectados e o briefing: negócio, público, mercado e estilo.", links: [["Perfis & briefing", "/creator/perfis"]] },
     { n: "01", t: "Análise & insights", d: "Dados do perfil, tendências e referências para decidir melhor.", links: [["Desempenho & insights", "/creator/desempenho"], ["Tendências", "/creator/tendencias"], ["Referências", "/creator/referencias"]] },
     { n: "02", t: "Criação & planejamento", d: "Da ideia ao calendário da semana ou do mês.", links: [["Formatos criativos", "/creator/formatos"], ["Laboratório", "/creator/laboratorio"], ["Planejador", "/creator/pauta"]] },
-    { n: "03", t: "Crescimento", d: "Estratégia 30/60/90 e automações que trabalham por você.", links: [["Estratégia", "/creator/estrategia"], ["Automações", "/creator/automacoes"]] },
+    { n: "03", t: "Crescimento", d: "Raio-X do perfil, estratégia 30/60/90 e automações que trabalham por você.", links: [["Raio-X do perfil", "/creator/diagnostico"], ["Estratégia", "/creator/estrategia"], ["Automações", "/creator/automacoes"]] },
   ];
 
   return (

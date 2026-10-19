@@ -12,6 +12,7 @@ const items = [
   { href: "/creator/formatos", label: "Formatos criativos", Icon: I.cards, group: "02 · Criação & planejamento" },
   { href: "/creator/laboratorio", label: "Laboratório", Icon: I.flask, group: "02 · Criação & planejamento" },
   { href: "/creator/pauta", label: "Planejador", Icon: I.calendar, group: "02 · Criação & planejamento" },
+  { href: "/creator/diagnostico", label: "Raio-X do perfil", Icon: I.chart, group: "03 · Crescimento" },
   { href: "/creator/estrategia", label: "Estratégia", Icon: I.trend, group: "03 · Crescimento" },
   { href: "/creator/automacoes", label: "Automações", Icon: I.bolt, group: "03 · Crescimento" },
 ];
