@@ -22,7 +22,8 @@ export default function GoogleSettings() {
     if (q.get("google") === "ok") setMsg({ t: "Google Agenda conectado. Seus compromissos futuros estão sendo enviados.", ok: true });
     if (q.get("google_erro")) setMsg({ t: q.get("google_erro")! });
     if (q.get("google") === "ok") {
-      fetch("/api/google/sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) }).then(() => load());
+      const post = (body: any) => fetch("/api/google/sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      post({ all: true }).then(() => post({ tasks: true })).then(() => load());
     }
     if (q.get("google") || q.get("google_erro")) window.history.replaceState(null, "", window.location.pathname + "#google");
   }, [load]);
@@ -34,10 +35,13 @@ export default function GoogleSettings() {
   }
   async function syncAll() {
     setBusy("sync"); setMsg(null);
-    const r = await fetch("/api/google/sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) }).then((x) => x.json()).catch(() => null);
+    const post = (body: any) => fetch("/api/google/sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((x) => x.json()).catch(() => null);
+    const r = await post({ all: true });
+    const t = r?.ok ? await post({ tasks: true }) : null;
     setBusy(null);
     if (r?.skipped === "not_connected") setMsg({ t: "Conexão com o Google expirou. Conecte de novo." });
-    else if (r?.ok) setMsg({ t: `${r.sent ?? 0} compromisso(s) enviados ao Google Agenda.`, ok: true });
+    else if (r?.ok && t && !t.ok) setMsg({ t: t.errors?.[0] || t.error || "Não foi possível enviar as tarefas." });
+    else if (r?.ok) setMsg({ t: `${r.sent ?? 0} compromisso(s) e ${t?.sent ?? 0} tarefa(s) com prazo enviados ao Google Agenda.`, ok: true });
     else if (r) setMsg({ t: r.errors?.[0] || r.error || "Não foi possível sincronizar." });
     load();
   }
@@ -62,7 +66,7 @@ export default function GoogleSettings() {
         <span className="w-10 h-10 rounded-xl bg-panel2 grid place-items-center text-mint shrink-0"><GIcon /></span>
         <div className="flex-1 min-w-0">
           <p className="font-display font-bold">Google Agenda</p>
-          <p className="text-xs text-fog mt-0.5">Sincronize a Agenda do Gestor com o seu Google Agenda.</p>
+          <p className="text-xs text-fog mt-0.5">Sincronize a Agenda e as tarefas com prazo de Seu dia com o seu Google Agenda.</p>
         </div>
       </div>
 
@@ -74,7 +78,7 @@ export default function GoogleSettings() {
           </div>
           {st.last_error && <p className="text-xs text-danger mt-2">{st.last_error}</p>}
           <div className="mt-2 divide-y divide-line">
-            <Toggle on={!!st.push} onChange={(v) => pref("push", v)} label="Enviar compromissos para o Google" hint="Ao criar, editar ou excluir na Agenda, a mudança vai para o seu Google Agenda (inclusive repetições)." />
+            <Toggle on={!!st.push} onChange={(v) => pref("push", v)} label="Enviar compromissos e tarefas para o Google" hint="Compromissos da Agenda (inclusive repetições) e tarefas com prazo, como eventos de dia inteiro, vão para o seu Google Agenda." />
             <Toggle on={!!st.pull} onChange={(v) => pref("pull", v)} label="Mostrar eventos do Google na Agenda" hint="Seus eventos do Google aparecem no calendário do VINCIT (somente leitura)." />
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
@@ -85,7 +89,7 @@ export default function GoogleSettings() {
       ) : (
         <div className="mt-4">
           <ul className="text-xs text-fog space-y-1 mb-4 list-disc pl-4">
-            <li>Compromissos criados no VINCIT vão automaticamente para o Google.</li>
+            <li>Compromissos e tarefas com prazo criados no VINCIT vão automaticamente para o Google.</li>
             <li>Eventos do Google aparecem na sua Agenda do VINCIT.</li>
             <li>Você pode desconectar quando quiser.</li>
           </ul>

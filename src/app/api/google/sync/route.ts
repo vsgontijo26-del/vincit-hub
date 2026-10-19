@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { EVENT_KINDS } from "@/lib/agency";
-import { gcal, googleToken, toGoogleEvent } from "@/lib/google";
+import { findTaskEvent, gcal, googleToken, toGoogleEvent, toGoogleTask } from "@/lib/google";
 
 /**
  * Envia compromissos da Agenda para o Google Agenda.
  * body: { event_id } cria/atualiza um · { delete: google_event_id } apaga um · { all: true } envia todos os futuros
+ * Tarefas com prazo viram eventos de dia inteiro:
+ * { task_id } cria/atualiza/remove uma · { delete_task: task_id } remove uma · { tasks: true } envia as abertas e as concluídas nos últimos 7 dias
  */
 export async function POST(request: Request) {
   const b = await request.json().catch(() => ({}));
@@ -20,6 +22,8 @@ export async function POST(request: Request) {
     const r = await gcal(auth.token, `/calendars/${cal}/events/${encodeURIComponent(b.delete)}`, { method: "DELETE" });
     return NextResponse.json({ ok: r.ok || r.status === 404 });
   }
+
+  if (b.task_id || b.delete_task || b.tasks) return syncTasks(s, auth.token, cal, b);
 
   let q = s.from("ag_events").select("*");
   if (b.event_id) q = q.eq("id", b.event_id);
@@ -39,6 +43,36 @@ export async function POST(request: Request) {
       sent++;
       if (r.data.id !== e.google_event_id) await s.from("ag_events").update({ google_event_id: r.data.id }).eq("id", e.id);
     } else errors.push(`${e.title}: ${r.data?.error?.message || r.status}`);
+  }
+  await s.rpc("google_tokens_update", { p_patch: { last_sync_at: new Date().toISOString(), last_error: errors[0] || null } });
+  return NextResponse.json({ ok: !errors.length, sent, errors });
+}
+
+async function syncTasks(s: any, token: string, cal: string, b: any) {
+  if (b.delete_task) {
+    const gid = await findTaskEvent(token, cal, b.delete_task);
+    if (gid) await gcal(token, `/calendars/${cal}/events/${encodeURIComponent(gid)}`, { method: "DELETE" });
+    return NextResponse.json({ ok: true });
+  }
+  let q = s.from("ag_tasks").select("id,title,description,assignee,start_date,due_date,done,done_at");
+  if (b.task_id) q = q.eq("id", b.task_id);
+  else q = q.not("due_date", "is", null).or(`done.eq.false,done_at.gte.${new Date(Date.now() - 7 * 864e5).toISOString()}`);
+  const { data: rows, error } = await q;
+  if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+
+  let sent = 0; const errors: string[] = [];
+  for (const t of rows || []) {
+    const gid = await findTaskEvent(token, cal, t.id);
+    if (!t.due_date) {
+      // tarefa sem prazo não fica no Google
+      if (gid) await gcal(token, `/calendars/${cal}/events/${encodeURIComponent(gid)}`, { method: "DELETE" });
+      continue;
+    }
+    const body = JSON.stringify(toGoogleTask(t));
+    const r = gid
+      ? await gcal(token, `/calendars/${cal}/events/${encodeURIComponent(gid)}`, { method: "PUT", body })
+      : await gcal(token, `/calendars/${cal}/events`, { method: "POST", body });
+    if (r.ok) sent++; else errors.push(`${t.title}: ${r.data?.error?.message || r.status}`);
   }
   await s.rpc("google_tokens_update", { p_patch: { last_sync_at: new Date().toISOString(), last_error: errors[0] || null } });
   return NextResponse.json({ ok: !errors.length, sent, errors });

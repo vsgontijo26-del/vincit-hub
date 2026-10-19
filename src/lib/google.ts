@@ -66,3 +66,25 @@ export function toGoogleEvent(e: any, kindLabel?: string) {
     extendedProperties: { private: { vincit_id: e.id } },
   };
 }
+
+/** dia seguinte de uma data "YYYY-MM-DD" (fim exclusivo de evento de dia inteiro) */
+const nextDay = (d: string) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
+
+/** converte uma tarefa com prazo em evento de dia inteiro do Google (do início ao prazo, ou só no prazo) */
+export function toGoogleTask(t: any) {
+  const start = t.start_date && t.start_date <= t.due_date ? t.start_date : t.due_date;
+  const desc = [t.description || "", t.assignee ? `Responsável: ${t.assignee}` : "", "— Tarefa do VINCIT HUB"].filter(Boolean).join("\n\n");
+  return {
+    summary: (t.done ? "✓ " : "") + t.title,
+    description: desc,
+    start: { date: start }, end: { date: nextDay(t.due_date) },
+    transparency: "transparent",
+    extendedProperties: { private: { vincit_task: t.id } },
+  };
+}
+
+/** evento do Google já criado para a tarefa (procurado pela marca privada vincit_task) */
+export async function findTaskEvent(token: string, cal: string, taskId: string): Promise<string | null> {
+  const r = await gcal(token, `/calendars/${cal}/events?privateExtendedProperty=${encodeURIComponent("vincit_task=" + taskId)}&showDeleted=false&maxResults=1`);
+  return r.ok ? r.data?.items?.[0]?.id || null : null;
+}
