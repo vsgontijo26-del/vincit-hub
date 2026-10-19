@@ -15,7 +15,7 @@ export default async function AgencyHome() {
 
   const [{ data: settings }, { data: tx }, { data: projects }, { data: events }, { data: tasks }, { data: deals }, { data: clients }] = await Promise.all([
     s.from("ag_settings").select("*").maybeSingle(),
-    s.from("ag_transactions").select("kind,amount,due_date,paid,paid_at,client_id").gte("due_date", sixAgo),
+    s.from("ag_transactions").select("kind,amount,due_date,paid,paid_at,client_id").is("transfer_id", null).gte("due_date", sixAgo),
     s.from("ag_projects").select("id,title,stage,due_date,revisions,delivered_at,value,client_id,ag_clients(name)").order("due_date", { ascending: true }),
     s.from("ag_events").select("id,title,kind,starts_at").gte("starts_at", now.toISOString().slice(0, 10)).lte("starts_at", in14).order("starts_at").limit(6),
     s.from("ag_tasks").select("id,title,due_date,done,assignee").eq("done", false).order("due_date", { ascending: true }).limit(50),

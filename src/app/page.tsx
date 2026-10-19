@@ -43,7 +43,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ b
   const ym = today.slice(0, 7);
   const [{ data: settings }, { data: tx }, { data: projects }, { data: events }, { data: tasks }, { data: proposals }, { data: ideas }] = await Promise.all([
     supabase.from("ag_settings").select("monthly_goal").maybeSingle(),
-    supabase.from("ag_transactions").select("kind,amount,due_date,paid,description").gte("due_date", new Date(now.getTime() - 365 * 864e5).toISOString().slice(0, 10)).lte("due_date", in7 > `${ym}-31` ? in7 : `${ym}-31`),
+    supabase.from("ag_transactions").select("kind,amount,due_date,paid,description").is("transfer_id", null).gte("due_date", new Date(now.getTime() - 365 * 864e5).toISOString().slice(0, 10)).lte("due_date", in7 > `${ym}-31` ? in7 : `${ym}-31`),
     supabase.from("ag_projects").select("id,title,stage,shoot_date,due_date"),
     supabase.from("ag_events").select("id,title,kind,starts_at,recurrence,recurrence_until,exdates,location"),
     supabase.from("ag_tasks").select("id,title,due_date,done,inbox,parent_id,event_id,priority").eq("done", false),
