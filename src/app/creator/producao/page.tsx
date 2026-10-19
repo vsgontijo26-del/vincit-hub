@@ -65,7 +65,7 @@ export default function Producao() {
         {pillars.length > 0 && <select className="input !w-auto" value={f.pillar} onChange={(e) => setF({ ...f, pillar: e.target.value })}><option value="">Todos os pilares</option>{pillars.map((x) => <option key={x}>{x}</option>)}</select>}
         <select className="input !w-auto" value={f.format} onChange={(e) => setF({ ...f, format: e.target.value })}><option value="">Todos os formatos</option>{FORMAT_LIST.map((x) => <option key={x}>{x}</option>)}</select>
         <button onClick={() => setF({ ...f, archived: !f.archived })} className={`btn btn-sm ${f.archived ? "btn-mint" : "btn-ghost"}`}>Arquivados</button>
-        {late > 0 && <span className="text-sm text-danger ml-auto">{late} atrasado{late > 1 ? "s" : ""}</span>}
+        <span className="text-sm text-fog ml-auto">{shown.length} conteúdo{shown.length === 1 ? "" : "s"}{late > 0 && <span className="text-danger"> · {late} atrasado{late > 1 ? "s" : ""}</span>}</span>
       </div>
 
       {!f.archived && <form onSubmit={add} className="flex gap-2 mb-5"><input className="input" value={nw} onChange={(e) => setNw(e.target.value)} placeholder="Nova ideia rápida…" /><button className="btn btn-mint"><I.plus className="w-4 h-4" />Adicionar</button></form>}
@@ -100,7 +100,7 @@ export default function Producao() {
                       <div key={it.id} draggable onDragStart={() => setDrag(it.id)} onDragEnd={() => setDrag(null)} onClick={() => setSel(it)}
                         className={`bg-panel2 border rounded-xl p-3 cursor-grab hover:border-mint-dim active:cursor-grabbing ${lt ? "border-danger/50" : "border-line"}`}>
                         <p className="text-sm leading-snug">{it.title}</p>
-                        <p className="text-[11px] text-fog mt-1 truncate">{acc ? `@${acc.username}` : "Sem perfil"}{cl ? ` · ${cl.company || cl.name}` : ""}{it.assignee ? ` · ${it.assignee}` : ""}</p>
+                        <p className="text-[11px] text-fog mt-1 truncate">{acc ? `@${acc.username}` : "Sem perfil"}{cl ? ` · ${cl.company || cl.name}` : ""}</p>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {it.format && <span className="chip">{it.format}</span>}
                           {it.pillar && <span className="chip">{it.pillar}</span>}
@@ -111,7 +111,10 @@ export default function Producao() {
                           {it.publish_error && <span className="chip" style={{ color: "#ff6b6b" }}>Falha ao publicar</span>}
                           {/^https?:\/\//i.test(it.post_url || "") && <a href={it.post_url} target="_blank" onClick={(e) => e.stopPropagation()} className="chip chip-mint">Ver post ↗</a>}
                         </div>
-                        {next && !f.archived && <button onClick={(e) => { e.stopPropagation(); move(it.id, next.id); }} className="text-[10px] text-fog border border-line rounded px-1.5 py-0.5 mt-2 hover:text-mint">→ {next.name}</button>}
+                        <div className="flex items-center justify-between gap-2 mt-2">
+                          {next && !f.archived ? <button onClick={(e) => { e.stopPropagation(); move(it.id, next.id); }} className="text-[10px] text-fog border border-line rounded px-1.5 py-0.5 hover:text-mint truncate">→ {next.name}</button> : <span />}
+                          {it.assignee && <span title={it.assignee} className="w-6 h-6 shrink-0 rounded-full bg-ink border border-line grid place-items-center text-[10px] font-semibold text-fog">{it.assignee.split(/\s+/).map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()}</span>}
+                        </div>
                       </div>
                     );
                   })}
