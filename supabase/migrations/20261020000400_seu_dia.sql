@@ -11,7 +11,7 @@ create index if not exists ag_tasks_content_id_idx on public.ag_tasks (content_i
 create index if not exists ag_tasks_remind_idx on public.ag_tasks (remind_at) where remind_at is not null and not done;
 
 -- 2. Espaços criados pelo sistema e lista de cada projeto
-alter table public.ag_spaces add column if not exists kind text check (kind in ('projetos','rotina'));
+alter table public.ag_spaces add column if not exists kind text check (kind in ('projetos','rotina','conteudo'));
 create unique index if not exists ag_spaces_owner_kind_key on public.ag_spaces (owner_id, kind) where kind is not null;
 alter table public.ag_lists add column if not exists project_id uuid references public.ag_projects(id) on delete set null;
 create unique index if not exists ag_lists_project_id_key on public.ag_lists (project_id) where project_id is not null;
@@ -169,11 +169,11 @@ begin
     where p.status in ('enviada', 'visualizada') and p.created_at < now() - interval '5 days'
     on conflict (owner_id, dedup_key) do nothing;
 
-    -- conteúdo que passou da data sem estar publicado (o texto de status segue sincronizado com status_id)
+    -- conteúdo que passou da data sem estar publicado
     insert into public.notifications (owner_id, kind, title, href, source_type, source_id, dedup_key)
-    select c.owner_id, 'conteudo_atrasado', 'Conteúdo atrasado: ' || coalesce(c.title, 'sem título'), '/creator/pauta', 'content', c.id, 'conteudo_atrasado:' || c.id || ':' || c.planned_for
-    from public.content_ideas c
-    where c.planned_for < today and coalesce(c.status, '') <> 'publicado' and c.archived_at is null
+    select c.owner_id, 'conteudo_atrasado', 'Conteúdo atrasado: ' || coalesce(c.title, 'sem título'), '/creator/producao?c=' || c.id, 'content', c.id, 'conteudo_atrasado:' || c.id || ':' || c.planned_for
+    from public.content_ideas c left join public.content_statuses s on s.id = c.status_id
+    where c.planned_for < today and c.archived_at is null and coalesce(s.stage, '') not in ('publicado', 'analisado')
     on conflict (owner_id, dedup_key) do nothing;
   end if;
 
@@ -181,6 +181,12 @@ begin
   select p.owner_id, 'revisoes_excedidas', p.title || ' passou de 3 revisões', '/agency/projetos/' || p.id, 'project', p.id, 'revisoes_excedidas:' || p.id || ':' || p.revisions
   from public.ag_projects p
   where p.revisions > 3 and p.stage <> 'entregue'
+  on conflict (owner_id, dedup_key) do nothing;
+
+  insert into public.notifications (owner_id, kind, title, href, source_type, source_id, dedup_key)
+  select c.owner_id, 'revisoes_excedidas', coalesce(c.title, 'Conteúdo') || ' passou de 3 revisões', '/creator/producao?c=' || c.id, 'content', c.id, 'revisoes_excedidas:' || c.id || ':' || c.revisions
+  from public.content_ideas c left join public.content_statuses s on s.id = c.status_id
+  where c.revisions > 3 and c.archived_at is null and coalesce(s.stage, '') not in ('publicado', 'analisado')
   on conflict (owner_id, dedup_key) do nothing;
 
   insert into public.notifications (owner_id, kind, title, href, source_type, source_id, dedup_key)
@@ -210,8 +216,9 @@ begin
    where n.read_at is null and n.source_type = 'transaction' and n.source_id = x.id and x.paid;
   delete from public.notifications n using public.ag_proposals p
    where n.read_at is null and n.source_type = 'proposal' and n.source_id = p.id and p.status not in ('enviada', 'visualizada');
-  delete from public.notifications n using public.content_ideas c
-   where n.read_at is null and n.source_type = 'content' and n.source_id = c.id and (c.status = 'publicado' or c.archived_at is not null);
+  delete from public.notifications n using public.content_ideas c left join public.content_statuses s on s.id = c.status_id
+   where n.read_at is null and n.source_type = 'content' and n.source_id = c.id
+     and (s.stage in ('publicado', 'analisado') or c.archived_at is not null);
   delete from public.notifications where read_at < now() - interval '30 days';
 end $$;
 revoke all on function private.notify_tick() from public, anon, authenticated;
@@ -227,7 +234,11 @@ begin
   end;
   -- só chama a aplicação quando há algo para fazer
   if exists (select 1 from public.dm_contacts where waiting = 'delay' and wait_until <= now())
-     or exists (select 1 from public.scheduled_posts where (status = 'agendado' and scheduled_at <= now()) or status = 'publicando') then
+     or exists (select 1 from public.scheduled_posts where (status = 'agendado' and scheduled_at <= now()) or status = 'publicando')
+     -- conteúdo publicado há 7+ dias esperando as métricas (rotina Analisado da conversa Integrações)
+     or exists (select 1 from public.content_ideas c join public.content_statuses s on s.id = c.status_id
+                where s.stage = 'publicado' and c.ig_media_id is not null and c.account_id is not null
+                  and c.status_changed_at <= now() - interval '7 days') then
     perform net.http_post(
       url := 'https://vincit-hub.vercel.app/api/cron/tick',
       headers := jsonb_build_object('content-type', 'application/json', 'x-cron-secret', (select value from private.app_config where key = 'webhook_secret')),
