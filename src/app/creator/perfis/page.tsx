@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAccounts, fmt } from "@/lib/useAccounts";
 import PageHead from "@/components/PageHead";
+import BriefingPanel from "@/components/creator/BriefingPanel";
 import { briefingProgress } from "@/lib/briefing";
 import { I } from "@/components/icons";
 
 export default function Perfis() {
+  const [tab, setTab] = useState<"perfis" | "briefing">("perfis");
+  useEffect(() => { if (new URLSearchParams(location.search).get("tab") === "briefing") setTab("briefing"); }, []);
+  const go = (t: "perfis" | "briefing") => { setTab(t); const u = new URL(location.href); u.searchParams.set("tab", t); history.replaceState(null, "", u); };
   const { accounts, loading, reload } = useAccounts();
   const [show, setShow] = useState(false);
   const [form, setForm] = useState({ username: "", niche: "", goals: "", followers_count: "" });
@@ -31,10 +35,12 @@ export default function Perfis() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · BASE" title="Perfis" desc="A base de tudo: conecte perfis pela Meta (ou cadastre manualmente). Depois preencha o Briefing de cada um para a IA criar com intenção.">
-        <button className="btn btn-ghost" onClick={() => setShow(!show)}><I.plus className="w-4 h-4" />Manual</button>
-        <a href="/api/meta/connect" className="btn btn-mint"><I.camera className="w-4 h-4" />Conectar via Meta</a>
+      <PageHead kicker="CREATOR · BASE" title="Perfis & briefing" desc="A base de tudo: conecte os perfis e preencha o briefing de cada um para a IA analisar, criar e planejar com intenção.">
+        {tab === "perfis" && <><button className="btn btn-ghost" onClick={() => setShow(!show)}><I.plus className="w-4 h-4" />Manual</button>
+        <a href="/api/meta/connect" className="btn btn-mint"><I.camera className="w-4 h-4" />Conectar via Meta</a></>}
       </PageHead>
+      <div className="flex gap-1 border-b border-line mb-6">{([["perfis", "Perfis"], ["briefing", "Briefing"]] as const).map(([k, l]) => <button key={k} onClick={() => go(k)} className={`px-4 py-2.5 text-sm border-b-2 -mb-px ${tab === k ? "border-mint text-mint" : "border-transparent text-fog hover:text-paper"}`}>{l}</button>)}</div>
+      {tab === "briefing" ? <BriefingPanel /> : <>
 
       {notice && <div className={`card px-4 py-3 mb-5 text-sm ${notice.ok ? "border-mint-dim text-mint" : "border-danger/40 text-danger"}`}>{notice.t}</div>}
 
@@ -75,6 +81,7 @@ export default function Perfis() {
           ))}
         </div>
       )}
+      </>}
     </>
   );
 }

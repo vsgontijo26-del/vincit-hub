@@ -5,8 +5,7 @@ import { I } from "./icons";
 /* Base → análise → criação & planejamento → crescimento */
 const items = [
   { href: "/creator", label: "Visão geral", Icon: I.grid },
-  { href: "/creator/perfis", label: "Perfis", Icon: I.user, group: "Base" },
-  { href: "/creator/briefing", label: "Briefing", Icon: I.briefcase, group: "Base" },
+  { href: "/creator/perfis", label: "Perfis & briefing", Icon: I.user, group: "Base" },
   { href: "/creator/desempenho", label: "Desempenho & insights", Icon: I.chart, group: "01 · Análise" },
   { href: "/creator/tendencias", label: "Tendências", Icon: I.trend, group: "01 · Análise" },
   { href: "/creator/referencias", label: "Referências", Icon: I.bookmark, group: "01 · Análise" },

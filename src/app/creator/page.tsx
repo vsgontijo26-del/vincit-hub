@@ -29,7 +29,7 @@ export default async function Overview() {
   ];
 
   const flow = [
-    { n: "00", t: "Base", d: "Perfis conectados e o briefing: negócio, público, mercado e estilo.", links: [["Perfis", "/creator/perfis"], ["Briefing", "/creator/briefing"]] },
+    { n: "00", t: "Base", d: "Perfis conectados e o briefing: negócio, público, mercado e estilo.", links: [["Perfis & briefing", "/creator/perfis"]] },
     { n: "01", t: "Análise & insights", d: "Dados do perfil, tendências e referências para decidir melhor.", links: [["Desempenho & insights", "/creator/desempenho"], ["Tendências", "/creator/tendencias"], ["Referências", "/creator/referencias"]] },
     { n: "02", t: "Criação & planejamento", d: "Da ideia ao calendário da semana ou do mês.", links: [["Formatos criativos", "/creator/formatos"], ["Laboratório", "/creator/laboratorio"], ["Planejador", "/creator/pauta"]] },
     { n: "03", t: "Crescimento", d: "Estratégia 30/60/90 e automações que trabalham por você.", links: [["Estratégia", "/creator/estrategia"], ["Automações", "/creator/automacoes"]] },

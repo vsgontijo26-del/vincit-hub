@@ -52,7 +52,7 @@ export default function Estrategia() {
       <PageHead kicker="CREATOR · 03 CRESCIMENTO" title="Estratégia de crescimento" desc="Plano de 30/60/90 dias feito a partir do briefing e das métricas do perfil: meta, KPIs, alavancas, fases com checklist, cadência e rotina." />
       <div className="card p-4 mb-5 flex flex-wrap items-center gap-3">
         <select className="input !w-auto" value={accId} onChange={(e) => setAccId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select>
-        {acc && <span className="text-xs text-fog">{fmt(acc.followers_count)} seguidores · briefing {briefingProgress(acc.briefing)}% {briefingProgress(acc.briefing) < 50 && <Link href="/creator/briefing" className="text-mint underline ml-1">complete para um plano melhor</Link>}</span>}
+        {acc && <span className="text-xs text-fog">{fmt(acc.followers_count)} seguidores · briefing {briefingProgress(acc.briefing)}% {briefingProgress(acc.briefing) < 50 && <Link href="/creator/perfis?tab=briefing" className="text-mint underline ml-1">complete para um plano melhor</Link>}</span>}
         {plans.length > 1 && <select className="input !w-auto ml-auto" value={cur?.id || ""} onChange={(e) => setCur(plans.find((x) => x.id === e.target.value))}>{plans.map((x) => <option key={x.id} value={x.id}>{new Date(x.created_at).toLocaleDateString("pt-BR")} · {x.horizon} dias</option>)}</select>}
         <button onClick={() => setShowNew(!showNew)} className={`btn btn-sm ${plans.length > 1 ? "" : "ml-auto"} btn-mint`}><I.spark className="w-4 h-4" />Nova estratégia</button>
       </div>
