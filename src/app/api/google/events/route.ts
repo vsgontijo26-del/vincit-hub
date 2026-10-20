@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   if (!r.ok) return NextResponse.json({ events: [], error: r.data?.error?.message || "Falha ao ler o Google Agenda" });
   const local = (iso: string) => new Date(new Date(iso).getTime() - 3 * 3600e3).toISOString();
   const events = (r.data?.items || [])
-    .filter((e: any) => e.status !== "cancelled" && !e.extendedProperties?.private?.vincit_id)
+    .filter((e: any) => e.status !== "cancelled" && !e.extendedProperties?.private?.vincit_id && !e.extendedProperties?.private?.vincit_task)
     .map((e: any) => {
       const allDay = !!e.start?.date;
       const st = allDay ? e.start.date : local(e.start.dateTime);
