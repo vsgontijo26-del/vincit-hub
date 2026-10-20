@@ -9,6 +9,7 @@ export const TOOLS: Tool[] = [
   { key: "creator:formatos", label: "Formatos criativos", hub: "creator", path: "/creator/formatos" },
   { key: "creator:laboratorio", label: "Laboratório", hub: "creator", path: "/creator/laboratorio" },
   { key: "creator:planejador", label: "Planejador", hub: "creator", path: "/creator/pauta" },
+  { key: "creator:producao", label: "Quadro de produção", hub: "creator", path: "/creator/producao" },
   { key: "creator:estrategia", label: "Estratégia de crescimento", hub: "creator", path: "/creator/estrategia" },
   { key: "creator:automacoes", label: "Automações", hub: "creator", path: "/creator/automacoes" },
   { key: "agency:clientes", label: "Clientes", hub: "agency", path: "/agency/clientes" },
