@@ -79,7 +79,7 @@ export default function Projeto() {
     await s().from("ag_bookings").insert({ ...newBk, end_date: end, project_id: id }); setNewBk({ equipment_id: "", start_date: "", end_date: "" }); setMsg(null); load();
   }
   async function delBooking(b: any) { await s().from("ag_bookings").delete().eq("id", b.id); load(); }
-  async function removeProject() { if (!confirm("Excluir este projeto, com tarefas, histórico e reservas?")) return; await s().from("ag_projects").delete().eq("id", id); router.push("/agency/projetos"); }
+  async function removeProject() { if (!confirm("Excluir este projeto, com tarefas, histórico e reservas?")) return; await s().from("ag_projects").delete().eq("id", id); router.push("/tarefas?view=projetos"); }
 
   if (!p) return <p className="text-fog">Carregando…</p>;
   const reviewLink = `${origin}/r/${p.review_token}`;
@@ -91,7 +91,7 @@ export default function Projeto() {
 
   return (
     <>
-      <Link href="/agency/projetos" className="inline-flex items-center gap-2 text-sm text-fog hover:text-paper mb-6"><I.back className="w-4 h-4" />Projetos</Link>
+      <Link href={`/tarefas?projeto=${id}`} className="inline-flex items-center gap-2 text-sm text-fog hover:text-paper mb-6"><I.back className="w-4 h-4" />Tarefas do projeto</Link>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 rise">
         <div>
           <p className="font-mono text-[11px] text-mint tracking-widest uppercase">{p.type || "Projeto"}</p>

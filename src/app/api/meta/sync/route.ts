@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { gget } from "@/lib/meta";
+import { gget, mediaRow, MEDIA_FIELDS } from "@/lib/meta";
 
 export const maxDuration = 300;
 
@@ -21,31 +21,10 @@ export async function POST(req: Request) {
 
     const media = await gget(`${acc.ig_user_id}/media`, {
       access_token: token, limit: "30",
-      fields: "id,caption,media_type,media_product_type,permalink,thumbnail_url,media_url,timestamp,like_count,comments_count",
+      fields: MEDIA_FIELDS,
     });
 
-    const rows = await Promise.all((media.data || []).map(async (m: any) => {
-      const row: any = {
-        owner_id: acc.owner_id, account_id, ig_media_id: m.id,
-        media_type: m.media_product_type === "REELS" ? "REELS" : m.media_type,
-        caption: m.caption, permalink: m.permalink, thumbnail_url: m.thumbnail_url || (m.media_type === "IMAGE" ? m.media_url : null),
-        posted_at: m.timestamp, like_count: m.like_count ?? 0, comments_count: m.comments_count ?? 0,
-      };
-      for (const metrics of ["reach,saved,shares,views", "reach,saved,shares", "reach,saved"]) {
-        try {
-          const ins = await gget(`${m.id}/insights`, { access_token: token, metric: metrics });
-          for (const it of ins.data || []) {
-            const v = it.values?.[0]?.value ?? it.total_value?.value;
-            if (it.name === "reach") row.reach = v;
-            if (it.name === "saved") row.saved = v;
-            if (it.name === "shares") row.shares = v;
-            if (it.name === "views") row.plays = v;
-          }
-          break;
-        } catch {}
-      }
-      return row;
-    }));
+    const rows = await Promise.all((media.data || []).map((m: any) => mediaRow(m, token, { owner_id: acc.owner_id, account_id })));
 
     if (rows.length) {
       const { error: e3 } = await supabase.from("ig_posts").upsert(rows, { onConflict: "account_id,ig_media_id" });

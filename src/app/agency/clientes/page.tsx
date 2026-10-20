@@ -126,7 +126,7 @@ export default function Clientes() {
             <h3 className="font-display font-bold mt-7 mb-3">Projetos</h3>
             <ul className="space-y-1.5">
               {detail.projects.map((p) => (
-                <li key={p.id}><Link href={`/agency/projetos/${p.id}`} className="flex items-center gap-3 bg-panel2 rounded-lg px-3 py-2 text-sm hover:text-mint">
+                <li key={p.id}><Link href={`/projetos/${p.id}`} className="flex items-center gap-3 bg-panel2 rounded-lg px-3 py-2 text-sm hover:text-mint">
                   <span className="flex-1 truncate">{p.title}</span><span className="chip">{stageLabel(p.stage)}</span><span className="font-mono text-xs">{brl(p.value)}</span></Link></li>
               ))}
               {!detail.projects.length && <p className="text-fog text-sm">Nenhum projeto ainda.</p>}

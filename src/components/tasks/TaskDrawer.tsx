@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { I } from "@/components/icons";
 import { PRIORITIES, Flag, RECUR } from "./shared";
+import { syncTask, unsyncTask } from "@/lib/gsync";
 
 type Props = {
   task: any | null; onClose: () => void; onChanged: () => void;
@@ -25,7 +26,9 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
   async function upd(v: any) {
     setT({ ...t, ...v });
     const { error } = await s().from("ag_tasks").update(v).eq("id", t.id);
-    if (error) alert(error.message); onChanged();
+    if (error) alert(error.message);
+    else if (["title", "due_date", "start_date", "done", "status_id", "inbox"].some((k) => k in v)) syncTask(t.id);
+    onChanged();
   }
   async function moveSpace(space_id: string) {
     const first = statuses.filter((x) => x.space_id === space_id).sort((a, b) => a.position - b.position)[0];
@@ -41,6 +44,7 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
   async function delSub(x: any) { await s().from("ag_tasks").delete().eq("id", x.id); onChanged(); }
   async function del() {
     if (!confirm(`Excluir "${t.title}"${subs.length ? ` e ${subs.length} subtarefa(s)` : ""}?`)) return;
+    unsyncTask(t.id);
     await s().from("ag_tasks").delete().eq("id", t.id); onChanged(); onClose();
   }
 
@@ -103,7 +107,7 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
               </div>
               {t.recurrence && <p className="text-[11px] text-fog mt-1">Ao concluir, a próxima tarefa é criada sozinha{t.due_date ? "" : " (defina um prazo)"}.{t.recurrence_until ? "" : " Sem data final."}</p>}
             </Row>
-            {t.event_id && <Row label="Agenda"><Link href="/agency/agenda" className="text-sm text-mint hover:underline">Compromisso vinculado ↗</Link></Row>}
+            {t.event_id && <Row label="Agenda"><Link href="/agenda" className="text-sm text-mint hover:underline">Compromisso vinculado ↗</Link></Row>}
             <Row label="Prioridade">
               <div className="flex flex-wrap gap-1">
                 {PRIORITIES.map((p) => (
@@ -123,7 +127,7 @@ export default function TaskDrawer({ task, onClose, onChanged, spaces, statuses,
             <Row label="Projeto">
               <div className="flex items-center gap-2">
                 <select className="input !py-1.5" value={t.project_id || ""} onChange={(e) => upd({ project_id: e.target.value || null })}><option value="">Nenhum</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}</select>
-                {t.project_id && <Link href={`/agency/projetos/${t.project_id}`} className="text-fog hover:text-mint"><I.arrow className="w-4 h-4" /></Link>}
+                {t.project_id && <Link href={`/tarefas?projeto=${t.project_id}`} className="text-fog hover:text-mint"><I.arrow className="w-4 h-4" /></Link>}
               </div>
             </Row>
           </div>
