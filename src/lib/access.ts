@@ -20,9 +20,6 @@ export const TOOLS: Tool[] = [
   { key: "ia", label: "Inteligência artificial (agentes, roteiros, análises)", hub: "geral" },
 ];
 
-/** rotas antigas/aliases que pertencem a uma ferramenta */
-const ALIAS: [string, string][] = [["/agency/config", "agency:propostas"], ["/creator/briefing", "creator:perfis"], ["/creator/copy", "creator:laboratorio"], ["/creator/agentes", "creator:laboratorio"]];
-
 export type Access = { role: "superadmin" | "user"; status: "ativo" | "pendente" | "suspenso" | "expirado"; tools: string[]; plan?: string | null; expires_at?: string | null; name?: string | null };
 
 export const can = (tools: string[] | undefined, key: string) => !!tools && (tools.includes("*") || tools.includes(key));
@@ -30,7 +27,6 @@ export const hubAllowed = (tools: string[] | undefined, hub: "creator" | "agency
 
 /** ferramenta exigida por um caminho (undefined = livre para usuários ativos) */
 export function toolForPath(path: string): string | undefined {
-  for (const [p, k] of ALIAS) if (path.startsWith(p)) return k;
   const t = TOOLS.filter((x) => x.path && (path === x.path || path.startsWith(x.path + "/"))).sort((a, b) => b.path!.length - a.path!.length)[0];
   return t?.key;
 }
