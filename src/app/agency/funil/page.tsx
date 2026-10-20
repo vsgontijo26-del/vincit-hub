@@ -30,7 +30,7 @@ export default function Funil() {
     const { data } = await createClient().from("ag_projects").insert({ title: won.title, client_id: won.client_id, value: won.value || 0 }).select().single();
     if (data) {
       if (won.client_id) await createClient().from("ag_clients").update({ status: "ativo" }).eq("id", won.client_id);
-      router.push(`/agency/projetos/${data.id}`);
+      router.push(`/projetos/${data.id}`);
     }
   }
 

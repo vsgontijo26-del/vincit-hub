@@ -18,14 +18,8 @@ export const TOOLS: Tool[] = [
   { key: "agency:financeiro", label: "Financeiro", hub: "agency", path: "/agency/financeiro" },
   { key: "agency:funil", label: "Funil de vendas", hub: "agency", path: "/agency/funil" },
   { key: "agency:propostas", label: "Propostas & orçamentos", hub: "agency", path: "/agency/propostas" },
-  { key: "agency:projetos", label: "Projetos", hub: "agency", path: "/agency/projetos" },
-  { key: "agency:tarefas", label: "Tarefas", hub: "agency", path: "/agency/tarefas" },
-  { key: "agency:agenda", label: "Agenda", hub: "agency", path: "/agency/agenda" },
   { key: "ia", label: "Inteligência artificial (agentes, roteiros, análises)", hub: "geral" },
 ];
-
-/** rotas antigas/aliases que pertencem a uma ferramenta */
-const ALIAS: [string, string][] = [["/agency/config", "agency:propostas"], ["/creator/briefing", "creator:perfis"], ["/creator/copy", "creator:laboratorio"], ["/creator/agentes", "creator:laboratorio"]];
 
 export type Access = { role: "superadmin" | "user"; status: "ativo" | "pendente" | "suspenso" | "expirado"; tools: string[]; plan?: string | null; expires_at?: string | null; name?: string | null };
 
@@ -34,7 +28,6 @@ export const hubAllowed = (tools: string[] | undefined, hub: "creator" | "agency
 
 /** ferramenta exigida por um caminho (undefined = livre para usuários ativos) */
 export function toolForPath(path: string): string | undefined {
-  for (const [p, k] of ALIAS) if (path.startsWith(p)) return k;
   const t = TOOLS.filter((x) => x.path && (path === x.path || path.startsWith(x.path + "/"))).sort((a, b) => b.path!.length - a.path!.length)[0];
   return t?.key;
 }

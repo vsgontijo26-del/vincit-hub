@@ -67,7 +67,7 @@ export default function Equipamentos() {
           <p className="text-xs text-fog mb-4">Reserve equipamentos dentro de cada projeto; conflitos de data são bloqueados.</p>
           <ul className="space-y-2">{upcoming.map((x) => (
             <li key={x.id} className="bg-panel2 rounded-lg px-3 py-2 text-sm"><p className="truncate">{e.rows.find((q) => q.id === x.equipment_id)?.name}</p>
-              <p className="text-[11px] text-fog">{dtShort(x.start_date)}{x.end_date !== x.start_date ? ` – ${dtShort(x.end_date)}` : ""} · {x.ag_projects ? <Link href={`/agency/projetos/${x.ag_projects.id}`} className="hover:text-mint">{x.ag_projects.title}</Link> : "–"}</p></li>
+              <p className="text-[11px] text-fog">{dtShort(x.start_date)}{x.end_date !== x.start_date ? ` – ${dtShort(x.end_date)}` : ""} · {x.ag_projects ? <Link href={`/projetos/${x.ag_projects.id}`} className="hover:text-mint">{x.ag_projects.title}</Link> : "–"}</p></li>
           ))}{!upcoming.length && <p className="text-fog text-sm">Nenhuma reserva futura.</p>}</ul>
         </section>
       </div>
