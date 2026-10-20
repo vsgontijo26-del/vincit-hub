@@ -23,7 +23,7 @@ export default function TodayTasks({ tasks, spaces, statuses, today }: { tasks: 
   }
   async function add(e: React.FormEvent) {
     e.preventDefault(); const title = draft.trim(); if (!title) return;
-    const sp = spaces.find((s) => !isProjectsSpace(s) && s.name !== "Rotina") || spaces[0];
+    const sp = spaces.find((s) => !isProjectsSpace(s) && !s.kind && s.name !== "Rotina") || spaces[0];
     const st = statuses.filter((x) => x.space_id === sp?.id).sort((a, b) => a.position - b.position)[0];
     setDraft("");
     const { data } = await createClient().from("ag_tasks").insert({ title, due_date: today, space_id: sp?.id || null, status_id: st?.id || null, priority: null }).select().single();
