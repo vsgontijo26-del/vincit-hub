@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Flag, Recur, recurLabel } from "./shared";
+import { syncTask } from "@/lib/gsync";
 
 const WD = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const addDays = (d: string, n: number) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
@@ -37,6 +38,7 @@ export default function WeekView({ tasks, statusById, spaces, today, showDone, o
     if (!ids.length) return;
     setLocal((p) => ({ ...p, ...Object.fromEntries(ids.map((id) => [id, date])) }));
     await createClient().from("ag_tasks").update({ due_date: date }).in("id", ids);
+    ids.forEach(syncTask);
     onChanged();
   }
   function drop(c: (typeof cols)[number]) {

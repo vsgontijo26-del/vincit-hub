@@ -6,6 +6,10 @@ import { I } from "./icons";
 import { A } from "./agency/icons";
 import { useAccess } from "@/lib/useAccess";
 import { hubAllowed } from "@/lib/access";
+import Bell from "./dia/Bell";
+
+/* rotas de Seu dia (a aba "/" fica ativa em todas) */
+const DIA = ["/tarefas", "/agenda", "/rotina", "/projetos"];
 
 /* Navegador horizontal: troca entre Seu dia e os hubs sem sair do topo */
 const tabs = [
@@ -18,7 +22,7 @@ export default function TopBar() {
   const path = usePathname();
   const acc = useAccess();
   const visible = tabs.filter((t) => !t.hub || !acc || hubAllowed(acc.tools, t.hub));
-  const isActive = (h: string) => (h === "/" ? path === "/" : path.startsWith(h));
+  const isActive = (h: string) => (h === "/" ? path === "/" || DIA.some((d) => path === d || path.startsWith(d + "/")) : path.startsWith(h));
   const nav = (
     <nav className="flex gap-1 bg-panel border border-line rounded-xl p-1">
       {visible.map(({ href, label, Icon }) => (
@@ -38,6 +42,7 @@ export default function TopBar() {
         </Link>
         <div className="hidden md:block">{nav}</div>
         <form action="/auth/signout" method="post" className="ml-auto flex items-center gap-2">
+          <Bell />
           {acc?.role === "superadmin" && <Link href="/admin" className="btn btn-ghost btn-sm text-mint">Admin</Link>}
           <Link href="/conta" className="btn btn-ghost btn-sm"><I.user className="w-3.5 h-3.5" /><span className="hidden sm:inline">Minha conta</span></Link>
           <button className="btn btn-ghost btn-sm" aria-label="Sair"><I.logout className="w-3.5 h-3.5" /><span className="hidden sm:inline">Sair</span></button>

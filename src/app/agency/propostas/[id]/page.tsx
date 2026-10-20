@@ -71,7 +71,7 @@ export default function Proposta() {
     const { data } = await s.from("ag_projects").insert({ title: p.title, client_id: p.client_id, proposal_id: p.id, value: p.total, description: [p.scope, p.deliverables].filter(Boolean).join("\n\n") }).select().single();
     if (data) {
       if (p.deal_id) await s.from("ag_deals").update({ stage: "ganho" }).eq("id", p.deal_id);
-      router.push(`/agency/projetos/${data.id}`);
+      router.push(`/projetos/${data.id}`);
     }
   }
   async function del() { if (!confirm("Excluir proposta?")) return; await createClient().from("ag_proposals").delete().eq("id", id); router.push("/agency/propostas"); }

@@ -6,6 +6,7 @@ import { useAccess } from "@/lib/useAccess";
 import { hubAllowed } from "@/lib/access";
 import { I } from "@/components/icons";
 import { RECUR, TEMPLATES, recurLabel } from "./shared";
+import { syncTask } from "@/lib/gsync";
 
 export const ROUTINE_SPACE = "Rotina";
 const WEEKDAY = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
@@ -27,12 +28,21 @@ function firstDate(p: (typeof PRESETS)[number], today: string) {
   const [y, m, d] = today.split("-").map(Number);
   return d <= p.day! ? `${today.slice(0, 8)}${String(p.day).padStart(2, "0")}` : new Date(Date.UTC(y, m, p.day!)).toISOString().slice(0, 10);
 }
-const when = (p: (typeof PRESETS)[number]) => (p.rule === "weekly" ? `Toda ${WEEKDAY[p.wd!]}` : `Todo dia ${p.day} do mês`);
+const when = (p: (typeof PRESETS)[number]) => (p.rule === "weekly" ? `${p.wd === 0 || p.wd === 6 ? "todo" : "toda"} ${WEEKDAY[p.wd!]}` : "todo mês");
 
-type Props = { open: boolean; onClose: () => void; spaces: any[]; statuses: any[]; tasks: any[]; today: string; onChanged: () => void };
+type PanelProps = { spaces: any[]; statuses: any[]; tasks: any[]; today: string; onChanged: () => void; wide?: boolean };
+
+export default function Routines({ open, onClose, ...p }: PanelProps & { open: boolean; onClose: () => void }) {
+  return (
+    <Modal open={open} title="Rotinas" onClose={onClose}>
+      <p className="text-sm text-fog mb-4">Tarefas que se repetem sozinhas. Ao concluir, a próxima já aparece com o novo prazo. Ficam no espaço &quot;{ROUTINE_SPACE}&quot;.</p>
+      <RoutinesPanel {...p} />
+    </Modal>
+  );
+}
 
 /** Rotinas: tarefas recorrentes prontas, ligadas ou desligadas num clique, no espaço "Rotina" */
-export default function Routines({ open, onClose, spaces, statuses, tasks, today, onChanged }: Props) {
+export function RoutinesPanel({ spaces, statuses, tasks, today, onChanged, wide }: PanelProps) {
   const acc = useAccess();
   const gestor = !acc || hubAllowed(acc.tools, "agency");
   const [busy, setBusy] = useState<string | null>(null);
@@ -52,8 +62,8 @@ export default function Routines({ open, onClose, spaces, statuses, tasks, today
   }
   async function add(title: string, recurrence: string, due_date: string, description?: string) {
     const sp = await ensureSpace(); if (!sp) return;
-    const { error } = await s().from("ag_tasks").insert({ title, recurrence, due_date, description: description || null, space_id: sp.id, status_id: sp.first, priority: null });
-    if (error) alert(error.message);
+    const { data, error } = await s().from("ag_tasks").insert({ title, recurrence, due_date, description: description || null, space_id: sp.id, status_id: sp.first, priority: null }).select("id").single();
+    if (error) alert(error.message); else if (data) syncTask(data.id);
   }
   async function toggle(p: (typeof PRESETS)[number]) {
     setBusy(p.k);
@@ -69,17 +79,17 @@ export default function Routines({ open, onClose, spaces, statuses, tasks, today
   async function stop(t: any) { await s().from("ag_tasks").delete().eq("id", t.id); onChanged(); }
 
   return (
-    <Modal open={open} title="Rotinas" onClose={onClose}>
-      <p className="text-sm text-fog mb-4">Tarefas que se repetem sozinhas. Ao concluir, a próxima já aparece com o novo prazo. Ficam no espaço &quot;{ROUTINE_SPACE}&quot;.</p>
-      <ul className="space-y-2">
+    <>
+      <ul className={wide ? "grid md:grid-cols-2 gap-x-6 gap-y-2" : "space-y-2"}>
         {PRESETS.filter((p) => !p.gestor || gestor).map((p) => {
           const on = active(p.title);
           return (
             <li key={p.k} className={`flex items-center gap-3 border rounded-xl px-3 py-2.5 ${on ? "border-mint/50 bg-mint/5" : "border-line"}`}>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{p.title}</p>
-                <p className="text-xs text-fog">{when(p)} · {p.desc}</p>
+                <p className="text-xs text-fog">{p.desc}</p>
               </div>
+              <span className="hidden sm:inline text-[11px] text-fog border border-line rounded-full px-2 py-0.5 whitespace-nowrap">{when(p)}{p.gestor ? " · Gestor" : ""}</span>
               <button disabled={busy === p.k} onClick={() => toggle(p)} role="switch" aria-checked={on} aria-label={p.title}
                 className={`w-10 h-6 rounded-full p-0.5 transition-colors shrink-0 ${on ? "bg-mint" : "bg-panel2 border border-line"}`}>
                 <span className={`block w-5 h-5 rounded-full transition-transform ${on ? "translate-x-4 bg-[var(--color-on-mint,#06140e)]" : "bg-fog"}`} />
@@ -103,6 +113,6 @@ export default function Routines({ open, onClose, spaces, statuses, tasks, today
         <input type="date" className="input !w-auto" title="Primeira vez" value={own.due_date} onChange={(e) => setOwn({ ...own, due_date: e.target.value })} />
         <button className="btn btn-mint" disabled={busy === "own"}><I.plus className="w-4 h-4" /></button>
       </form>
-    </Modal>
+    </>
   );
 }

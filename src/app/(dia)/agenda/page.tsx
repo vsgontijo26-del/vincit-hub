@@ -78,8 +78,8 @@ export default function Agenda() {
       }
       return occ;
     }),
-    ...pr.rows.filter((p) => p.shoot_date).map((p) => ({ id: "s" + p.id, title: p.title, kind: "captacao", date: p.shoot_date, href: `/agency/projetos/${p.id}` })),
-    ...pr.rows.filter((p) => p.due_date && p.stage !== "entregue").map((p) => ({ id: "d" + p.id, title: "Entrega: " + p.title, kind: "entrega", date: p.due_date, href: `/agency/projetos/${p.id}` })),
+    ...pr.rows.filter((p) => p.shoot_date).map((p) => ({ id: "s" + p.id, title: p.title, kind: "captacao", date: p.shoot_date, href: `/projetos/${p.id}` })),
+    ...pr.rows.filter((p) => p.due_date && p.stage !== "entregue").map((p) => ({ id: "d" + p.id, title: "Entrega: " + p.title, kind: "entrega", date: p.due_date, href: `/projetos/${p.id}` })),
     ...gEvents.map((g) => ({ id: "g" + g.id, title: g.title, kind: "google", date: g.date, time: g.time || undefined, ext: g.link })),
     ...tx.rows.filter((x) => !x.paid && x.kind === "entrada").map((x) => ({ id: "t" + x.id, title: x.description, kind: "pagamento", date: x.due_date, href: "/agency/financeiro" })),
   ].filter((e) => !hidden.includes(e.kind));
@@ -169,7 +169,7 @@ export default function Agenda() {
 
   return (
     <>
-      <PageHead kicker="GESTOR · 01 OPERAÇÃO" title="Agenda" desc="Compromissos, tarefas com prazo, captações, entregas e recebimentos no mesmo calendário. Cada compromisso pode virar tarefa e se repetir.">
+      <PageHead kicker="SEU DIA · AGENDA" title="Agenda" desc="Compromissos, tarefas com prazo, captações, entregas e recebimentos no mesmo calendário. Cada compromisso pode virar tarefa e se repetir.">
         <button className="btn btn-mint" onClick={() => openNew(td)}><I.plus className="w-4 h-4" />Novo compromisso</button>
       </PageHead>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">

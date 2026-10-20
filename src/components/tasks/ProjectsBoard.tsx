@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useTable } from "@/lib/useTable";
 import { PROJECT_STAGES, PROJECT_TYPES, brlShort, dtShort, today, stageLabel } from "@/lib/agency";
-import PageHead from "@/components/PageHead";
 import Modal from "@/components/agency/Modal";
 import Fields from "@/components/agency/Fields";
 import { I } from "@/components/icons";
 
 const REVIEW: Record<string, [string, string]> = { pendente: ["Aguardando cliente", "chip"], aprovado: ["Aprovado", "chip chip-mint"], alteracao: ["Pediu alteração", "chip text-danger border-danger/40"] };
 
-export default function Projetos() {
+/** Visão Projetos do gestor de tarefas: todos os projetos em colunas por etapa */
+export default function ProjectsBoard({ onChanged }: { onChanged?: () => void }) {
   const router = useRouter();
   const p = useTable<any>("ag_projects", { select: "*, ag_clients(name)", order: "due_date", asc: true });
   const clients = useTable<any>("ag_clients", { order: "name", asc: true });
@@ -27,11 +27,12 @@ export default function Projetos() {
     if (!prj || prj.stage === stage) return;
     await p.patch(id, { stage, ...(stage === "entregue" ? { delivered_at: new Date().toISOString() } : {}) });
     await createClient().from("ag_project_events").insert({ project_id: id, kind: "status", text: `Etapa: ${stageLabel(prj.stage)} → ${stageLabel(stage)}` });
+    onChanged?.();
   }
   async function create(e: React.FormEvent) {
     e.preventDefault();
     const saved: any = await p.save({ ...form });
-    if (saved) { setForm(null); router.push(`/agency/projetos/${saved.id}`); }
+    if (saved) { setForm(null); onChanged?.(); router.push(`/tarefas?projeto=${saved.id}`); }
   }
 
   const fields = [
@@ -47,10 +48,11 @@ export default function Projetos() {
 
   return (
     <>
-      <PageHead kicker="GESTOR · 01 OPERAÇÃO" title="Projetos" desc="Do briefing à entrega. Arraste os cards entre as etapas; cada mudança fica registrada no histórico.">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <p className="text-sm text-fog mr-auto">Do briefing à entrega. Arraste os cards entre as etapas; cada mudança fica no histórico do projeto.</p>
         <div className="flex rounded-lg border border-line overflow-hidden">{(["quadro", "lista"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-2 text-xs capitalize ${view === v ? "bg-mint text-black font-semibold" : "text-fog"}`}>{v}</button>)}</div>
-        <button className="btn btn-mint" onClick={() => setForm({ stage: "briefing" })}><I.plus className="w-4 h-4" />Novo projeto</button>
-      </PageHead>
+        <button className="btn btn-mint btn-sm" onClick={() => setForm({ stage: "briefing" })}><I.plus className="w-4 h-4" />Novo projeto</button>
+      </div>
       {p.error && <p className="text-danger text-sm mb-4">{p.error}</p>}
 
       {view === "quadro" ? (
@@ -66,7 +68,7 @@ export default function Projetos() {
                     const late = x.due_date && x.due_date < t && x.stage !== "entregue";
                     const rv = REVIEW[x.review_status];
                     return (
-                      <Link key={x.id} href={`/agency/projetos/${x.id}`} draggable onDragStart={() => setDrag(x.id)} onDragEnd={() => setDrag(null)}
+                      <Link key={x.id} href={`/tarefas?projeto=${x.id}`} draggable onDragStart={() => setDrag(x.id)} onDragEnd={() => setDrag(null)}
                         className="block bg-panel2 border border-line rounded-xl p-3 hover:border-mint-dim">
                         <p className="text-sm font-medium leading-snug">{x.title}</p>
                         <p className="text-xs text-fog mt-1">{x.ag_clients?.name || "Sem cliente"}{x.type ? ` · ${x.type}` : ""}</p>
@@ -92,7 +94,7 @@ export default function Projetos() {
           <table className="w-full text-sm min-w-[720px]">
             <thead><tr className="text-left text-fog text-xs border-b border-line">{["Projeto", "Cliente", "Etapa", "Responsável", "Prazo", "Valor"].map((h) => <th key={h} className="p-3 font-normal">{h}</th>)}</tr></thead>
             <tbody>{p.rows.map((x) => (
-              <tr key={x.id} className="border-b border-line/60 hover:bg-panel2/50 cursor-pointer" onClick={() => router.push(`/agency/projetos/${x.id}`)}>
+              <tr key={x.id} className="border-b border-line/60 hover:bg-panel2/50 cursor-pointer" onClick={() => router.push(`/tarefas?projeto=${x.id}`)}>
                 <td className="p-3">{x.title}</td><td className="p-3 text-fog">{x.ag_clients?.name || "–"}</td><td className="p-3"><span className="chip">{stageLabel(x.stage)}</span></td>
                 <td className="p-3 text-fog">{x.responsible || "–"}</td><td className={`p-3 ${x.due_date && x.due_date < t && x.stage !== "entregue" ? "text-danger" : "text-fog"}`}>{dtShort(x.due_date)}</td><td className="p-3 font-mono text-xs">{brlShort(x.value)}</td>
               </tr>))}</tbody>
