@@ -75,7 +75,7 @@ export default function Formatos() {
       <form onSubmit={suggest} className="card p-4 mb-5">
         <p className="font-display font-bold">Não sabe qual carta usar?</p>
         <p className="text-xs text-fog mb-3">Descreva o tema e a IA indica 3 combinações de cartas com a ideia de cada uma.</p>
-        <div className="flex flex-col sm:flex-row gap-2"><select className="input sm:!w-48" value={sugFmt} onChange={(e) => setSugFmt(e.target.value)}><option value="">Qualquer formato</option>{DELIVERY_FORMATS.map((d) => <option key={d} value={d}>{d === "YouTube" ? "YouTube (longo)" : d}</option>)}</select><input required className="input" value={sug.topic} onChange={(e) => setSug({ ...sug, topic: e.target.value })} placeholder="Ex.: mostrar que vídeo institucional pode ser emocionante" /><button disabled={sugAI.busy} className="btn btn-mint btn-sm whitespace-nowrap"><I.spark className="w-4 h-4" />{sugAI.busy ? "Pensando…" : "Sugerir"}</button></div>
+        <div className="flex flex-col sm:flex-row gap-2"><select className="input sm:!w-48" value={sugFmt} onChange={(e) => setSugFmt(e.target.value)}><option value="">Qualquer formato</option>{DELIVERY_FORMATS.map((d) => <option key={d} value={d}>{d === "YouTube" ? "YouTube (longo)" : d}</option>)}</select><input required className="input" value={sug.topic} onChange={(e) => setSug({ ...sug, topic: e.target.value })} placeholder="Ex.: mostrar que vídeo institucional pode ser emocionante" /><button disabled={sugAI.busy} className="btn btn-mint btn-sm whitespace-nowrap"><I.spark className="w-4 h-4" />{sugAI.queued ? "Na fila do Claude…" : sugAI.busy ? "Pensando…" : "Sugerir"}</button></div>
         {sugAI.error && <p className="text-danger text-sm mt-2">{sugAI.error}</p>}
         {sug.out && <div className="mt-4 border-t border-line pt-4"><Markdown text={sug.out} /></div>}
       </form>
@@ -149,7 +149,7 @@ export default function Formatos() {
               <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={f.accountId} onChange={(v) => setF({ ...f, accountId: v })} /></div>
               <div className="md:col-span-2 flex flex-wrap gap-2 justify-end">
                 <Link href={`/creator/laboratorio?tab=criar&carta=${sel.id}&format=${encodeURIComponent(f.format)}`} className="btn btn-ghost btn-sm">Abrir no Laboratório</Link>
-                <button disabled={ai.busy} className="btn btn-mint btn-sm"><I.spark className="w-4 h-4" />{ai.busy ? "Criando…" : "Gerar roteiro com a carta"}</button>
+                <button disabled={ai.busy} className="btn btn-mint btn-sm"><I.spark className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Criando…" : "Gerar roteiro com a carta"}</button>
               </div>
               {ai.error && <p className="md:col-span-2 text-danger text-sm">{ai.error}</p>}
             </form>

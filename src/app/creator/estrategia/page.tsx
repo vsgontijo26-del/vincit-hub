@@ -67,7 +67,7 @@ export default function Estrategia() {
           <div><label className="label">Horizonte</label><select className="input" value={f.horizon} onChange={(e) => setF({ ...f, horizon: Number(e.target.value) })}>{[30, 60, 90, 180].map((h) => <option key={h} value={h}>{h} dias</option>)}</select></div>
           <div className="md:col-span-2"><label className="label">Tempo e recursos para o período (opcional)</label><input className="input" value={f.resources} onChange={(e) => setF({ ...f, resources: e.target.value })} placeholder="Ex.: 6h/semana, 1 diária de gravação por mês, editor próprio" /></div>
           {ai.error && <p className="md:col-span-2 text-danger text-sm">{ai.error}</p>}
-          <div className="md:col-span-2 flex justify-end"><button disabled={ai.busy || !acc} className="btn btn-mint">{ai.busy ? "Montando a estratégia… (até 1 min)" : "Gerar estratégia"}</button></div>
+          <div className="md:col-span-2 flex justify-end"><button disabled={ai.busy || !acc} className="btn btn-mint">{ai.queued ? "Na fila do Claude…" : ai.busy ? "Montando a estratégia… (até 1 min)" : "Gerar estratégia"}</button></div>
         </form>
       )}
 

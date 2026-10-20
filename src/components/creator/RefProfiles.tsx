@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { aiFetch } from "@/lib/useAI";
 import { useAccounts, fmt } from "@/lib/useAccounts";
 import { FORMATS } from "@/lib/formats";
 import { I } from "@/components/icons";
@@ -29,9 +30,8 @@ export default function RefProfiles() {
   async function analyze(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr(null);
     try {
-      const r = await fetch("/api/ref-profile", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url: f.url, account_id: f.account_id || undefined, paste: f.paste || undefined }) });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Erro");
+      const j = await aiFetch("/api/ref-profile", { url: f.url, account_id: f.account_id || undefined, paste: f.paste || undefined }, () => setMsg("Pedido na fila do Claude. Pode sair da página: a análise aparece aqui quando ficar pronta."));
+      setMsg(null);
       setF({ ...f, url: "", paste: "" }); setShowPaste(false);
       await load(); openRow(j);
     } catch (e: any) { setErr(e.message); if (/Cole legendas|cole títulos/i.test(e.message)) setShowPaste(true); }

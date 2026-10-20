@@ -70,7 +70,7 @@ export default function Pauta() {
           <div className="md:col-span-2"><label className="label">Foco do período</label><input className="input" value={gen.focus} onChange={(e) => setGen({ ...gen, focus: e.target.value })} placeholder="Ex.: lançamento do pacote mensal, autoridade, crescimento" /></div>
           {gen.strategy && <p className="md:col-span-4 text-xs text-fog bg-panel2 rounded-lg p-2.5">Seguindo a estratégia: {gen.strategy}</p>}
           {ai.error && <p className="md:col-span-4 text-danger text-sm">{ai.error}</p>}
-          <div className="md:col-span-4 flex justify-between items-center"><Link href="/creator/estrategia" className="text-xs text-fog hover:text-mint">Ainda sem estratégia? Monte primeiro →</Link><button disabled={ai.busy} className="btn btn-mint">{ai.busy ? "Planejando…" : `Gerar ${gen.period === "mes" ? "mês" : "semana"}`}</button></div>
+          <div className="md:col-span-4 flex justify-between items-center"><Link href="/creator/estrategia" className="text-xs text-fog hover:text-mint">Ainda sem estratégia? Monte primeiro →</Link><button disabled={ai.busy} className="btn btn-mint">{ai.queued ? "Na fila do Claude…" : ai.busy ? "Planejando…" : `Gerar ${gen.period === "mes" ? "mês" : "semana"}`}</button></div>
         </form>
       )}
       {(() => {

@@ -1,3 +1,7 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
 const SYSTEM = `Você é o CREATOR, estrategista sênior de conteúdo para Instagram do VINCIT HUB.
 A VINCIT é uma produtora audiovisual brasileira. Você ajuda a planejar conteúdo estratégico: análise de perfis, tendências, referências, ganchos, roteiros, legendas e automações por palavra-chave.
 Regras:
@@ -13,12 +17,66 @@ Regras:
 
 /** Cota diária de uso da IA por assinante (função ai_quota_hit no banco). Sem a função, libera. */
 export async function aiQuotaExceeded(supabase: any) {
+  if (aiCtx.getStore()?.answer != null) return false;
   const { data, error } = await supabase.rpc("ai_quota_hit");
   return !error && data === false;
 }
 export const QUOTA_MSG = "Você atingiu o limite diário de uso da IA. Tente de novo amanhã.";
 
+/*
+ * Fila do Claude: sem AI_MODE=api (e a chave), o pedido não vai à API da Anthropic. A rota grava o prompt em
+ * ai_requests, uma tarefa agendada do Claude responde e grava result_text, e o navegador chama a mesma rota de
+ * novo com _ai_request: aí callClaude devolve a resposta pronta e a rota segue igual (JSON, gravação no banco).
+ */
+type AICtx = { answer?: string; queued?: { system: string; prompt: string; webSearch: boolean; maxTokens: number } };
+const aiCtx = new AsyncLocalStorage<AICtx>();
+export const aiQueueMode = () => !(process.env.AI_MODE === "api" && process.env.ANTHROPIC_API_KEY);
+
+const LABELS: Record<string, string> = {
+  profile_diagnosis: "Diagnóstico do perfil", trends: "Tendências", reference: "Análise de referência", copy: "Criar conteúdo",
+  automation_copy: "Mensagens da automação", agent: "Agente do Laboratório", format_apply: "Aplicar formato criativo",
+  format_suggest: "Sugerir formatos", growth_plan: "Estratégia de crescimento", content_calendar: "Calendário de conteúdo",
+  briefing_draft: "Rascunho do briefing", brand_voice: "Voz da marca", proposal_text: "Texto da proposta",
+  diagnostico: "Raio-X do perfil", "ref-profile": "Perfil de referência",
+};
+
+/** Envolve o POST de uma rota de IA: manda o pedido para a fila ou entrega a resposta que o Claude já gravou */
+export function withAIQueue(endpoint: "ai" | "diagnostico" | "ref-profile", handle: (body: any) => Promise<Response>) {
+  return async (req: Request) => {
+    const { _ai_request, ...body } = await req.json().catch(() => ({}));
+    const sb = await createClient();
+    if (_ai_request) {
+      const { data: row } = await sb.from("ai_requests").select("id,endpoint,status,result_text,error,response,delivered_at").eq("id", _ai_request).maybeSingle();
+      if (!row || row.endpoint !== endpoint) return NextResponse.json({ error: "Pedido não encontrado" }, { status: 404 });
+      if (row.status === "error") return NextResponse.json({ error: row.error || "O Claude não conseguiu responder este pedido." }, { status: 500 });
+      if (row.status !== "done") return NextResponse.json({ queued: true, request_id: row.id, status: row.status }, { status: 202 });
+      if (row.delivered_at && row.response) return NextResponse.json(row.response);
+      const res = await aiCtx.run({ answer: row.result_text || "" }, () => handle(body));
+      const json = await res.clone().json().catch(() => null);
+      await sb.from("ai_requests").update(res.ok ? { response: json, delivered_at: new Date().toISOString() } : { delivered_at: new Date().toISOString() }).eq("id", row.id);
+      return res;
+    }
+    const ctx: AICtx = {};
+    const res = await aiCtx.run(ctx, () => handle(body));
+    if (!ctx.queued) return res;
+    const task = endpoint === "ai" ? body.task : endpoint;
+    const { data: row, error } = await sb.from("ai_requests").insert({
+      endpoint, task, label: LABELS[task] || task, payload: body,
+      account_id: body.account_id || body.data?.account?.id || null,
+      system: ctx.queued.system, prompt: ctx.queued.prompt, web_search: ctx.queued.webSearch, max_tokens: ctx.queued.maxTokens,
+    }).select("id").single();
+    if (error) return NextResponse.json({ error: `Não consegui pôr o pedido na fila do Claude: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ queued: true, request_id: row.id, status: "pending" }, { status: 202 });
+  };
+}
+
 export async function callClaude(opts: { prompt: string; webSearch?: boolean; maxTokens?: number }) {
+  const store = aiCtx.getStore();
+  if (store?.answer != null) return store.answer;
+  if (aiQueueMode()) {
+    if (store) store.queued = { system: SYSTEM, prompt: opts.prompt, webSearch: !!opts.webSearch, maxTokens: opts.maxTokens ?? 4000 };
+    throw new Error("Pedido enviado para a fila do Claude.");
+  }
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("A chave da IA (ANTHROPIC_API_KEY) ainda não foi configurada no Vercel.");
   const body: any = {

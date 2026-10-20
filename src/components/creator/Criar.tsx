@@ -59,7 +59,7 @@ export default function Criar() {
           <div><label className="label">Formato criativo (carta)</label>
             <select className="input" value={f.card} onChange={(e) => setF({ ...f, card: e.target.value })}><option value="">Deixar a IA escolher</option>{FORMATS.filter((x) => x.fmt.includes(FORMAT_MIDIA[f.format])).map((x) => <option key={x.id} value={x.id}>{x.n}. {x.name}</option>)}</select>
             <p className="text-[11px] text-fog mt-1">Mostrando só cartas de {MIDIAS[FORMAT_MIDIA[f.format]].l.toLowerCase()}.</p></div>
-          <button disabled={ai.busy} className="btn btn-mint w-full"><I.pen className="w-4 h-4" />{ai.busy ? "Escrevendo…" : "Gerar conteúdo"}</button>
+          <button disabled={ai.busy} className="btn btn-mint w-full"><I.pen className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Escrevendo…" : "Gerar conteúdo"}</button>
           {ai.error && <p className="text-danger text-sm">{ai.error}</p>}
         </form>
         <section className="lg:col-span-3 card p-6 min-h-[420px]">
