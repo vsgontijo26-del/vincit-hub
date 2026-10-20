@@ -20,11 +20,15 @@ export default function Estrategia() {
   const ai = useAI();
   const acc = accounts.find((a) => a.id === accId);
 
-  useEffect(() => { if (!accId && accounts[0]) setAccId(accounts[0].id); }, [accounts, accId]);
+  useEffect(() => {
+    if (accId || !accounts[0]) return;
+    const q = new URLSearchParams(location.search).get("perfil");
+    setAccId(accounts.some((a) => a.id === q) ? q! : accounts[0].id);
+  }, [accounts, accId]);
   const load = useCallback(async () => {
     if (!accId) return;
     const { data } = await createClient().from("growth_plans").select("*").eq("account_id", accId).order("created_at", { ascending: false });
-    setPlans(data || []); setCur((data || [])[0] || null); setShowNew(!(data || []).length);
+    setPlans(data || []); setCur((data || [])[0] || null); setShowNew(!(data || []).length || new URLSearchParams(location.search).has("novo"));
   }, [accId]);
   useEffect(() => { load(); }, [load]);
 
@@ -49,7 +53,7 @@ export default function Estrategia() {
 
   return (
     <>
-      <PageHead kicker="CREATOR · 03 CRESCIMENTO" title="Estratégia de crescimento" desc="Plano de 30/60/90 dias feito a partir do briefing e das métricas do perfil: meta, KPIs, alavancas, fases com checklist, cadência e rotina." />
+      <PageHead kicker="CREATOR · 03 CRESCIMENTO" title="Estratégia de crescimento" desc="Plano de 30/60/90 dias feito a partir do briefing, das métricas e do último Raio-X do perfil: meta, KPIs, alavancas, fases com checklist, cadência e rotina." />
       <div className="card p-4 mb-5 flex flex-wrap items-center gap-3">
         <select className="input !w-auto" value={accId} onChange={(e) => setAccId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>@{a.username}</option>)}</select>
         {acc && <span className="text-xs text-fog">{fmt(acc.followers_count)} seguidores · briefing {briefingProgress(acc.briefing)}% {briefingProgress(acc.briefing) < 50 && <Link href="/creator/perfis?tab=briefing" className="text-mint underline ml-1">complete para um plano melhor</Link>}</span>}
