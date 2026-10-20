@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { igToken } from "@/lib/tokens";
 import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG } from "@/lib/ai";
 import { gget } from "@/lib/meta";
 import { briefingText } from "@/lib/briefing";
@@ -26,7 +27,7 @@ async function instagram(supabase: any, handle: string, accountId?: string): Pro
   const { data: accs } = await q.limit(1);
   const acc = accs?.[0];
   if (!acc) return null;
-  const { data: token } = await supabase.rpc("ig_get_token", { p_account_id: acc.id });
+  const token = await igToken(supabase, acc.id);
   if (!token) return null;
   const f = `business_discovery.username(${handle}){username,name,biography,profile_picture_url,followers_count,media_count,media.limit(40){caption,media_type,media_product_type,timestamp,like_count,comments_count,permalink}}`;
   const j = await gget(acc.ig_user_id, { access_token: token, fields: f });

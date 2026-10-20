@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHash, timingSafeEqual } from "crypto";
-import { createAnonClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { runFrom, log, publishStep } from "@/lib/flows";
 import { gget, mediaRow, MEDIA_FIELDS } from "@/lib/meta";
 
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const secret = process.env.WEBHOOK_DB_SECRET!;
   const h = (v: string) => createHash("sha256").update(v).digest();
   if (!secret || !timingSafeEqual(h(req.headers.get("x-cron-secret") || ""), h(secret))) return new Response("forbidden", { status: 403 });
-  const db = createAnonClient();
+  const db = createServiceClient();
   const { data, error } = await db.rpc("wh_due", { p_secret: secret });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   const out = { contacts: 0, posts: 0, analyzed: 0 };

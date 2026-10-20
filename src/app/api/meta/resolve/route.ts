@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { igToken } from "@/lib/tokens";
 import { gget, mediaRow, shortcodeFrom, MEDIA_FIELDS } from "@/lib/meta";
 
 export const maxDuration = 60;
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
 
     const has = (p?: string | null) => !!p && new RegExp(`/(p|reel|reels|tv)/${code}(/|$|\\?)`).test(p);
     const tokens: Record<string, string> = {};
-    const tokenOf = async (id: string) => (tokens[id] ??= (await s.rpc("ig_get_token", { p_account_id: id })).data as string);
+    const tokenOf = async (id: string) => (tokens[id] ??= (await igToken(s, id)) as string);
 
     // 1) já importado: só atualiza as métricas
     const { data: known } = await s.from("ig_posts").select("account_id,ig_media_id,permalink").in("account_id", accounts.map((a) => a.id)).ilike("permalink", `%/${code}%`);

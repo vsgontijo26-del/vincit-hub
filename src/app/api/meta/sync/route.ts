@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { igToken } from "@/lib/tokens";
 import { gget, mediaRow, MEDIA_FIELDS } from "@/lib/meta";
 
 export const maxDuration = 300;
@@ -10,8 +11,8 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     const { data: acc } = await supabase.from("ig_accounts").select("*").eq("id", account_id).single();
     if (!acc?.ig_user_id) throw new Error("Conta não conectada à Meta.");
-    const { data: token, error } = await supabase.rpc("ig_get_token", { p_account_id: account_id });
-    if (error || !token) throw new Error("Token não encontrado. Conecte a conta de novo.");
+    const token = await igToken(supabase, account_id);
+    if (!token) throw new Error("Token não encontrado. Conecte a conta de novo.");
 
     const prof = await gget(acc.ig_user_id, { access_token: token, fields: "username,name,profile_picture_url,followers_count,follows_count,media_count" });
     await supabase.from("ig_accounts").update({

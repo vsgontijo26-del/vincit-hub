@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
-import { createAnonClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { GRAPH, gpost, matches } from "@/lib/meta";
 import { runFrom, answer, log } from "@/lib/flows";
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const raw = await req.text();
   if (!validSignature(raw, req.headers.get("x-hub-signature-256"))) return new Response("bad signature", { status: 401 });
   const body = JSON.parse(raw);
-  const db = createAnonClient();
+  const db = createServiceClient();
   const secret = process.env.WEBHOOK_DB_SECRET!;
 
   for (const entry of body.entry || []) {

@@ -1,5 +1,6 @@
 /** Integração com o Google Agenda (OAuth por usuário, tokens guardados em private.google_tokens) */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { googleCfg } from "@/lib/tokens";
 
 export const GOOGLE_SCOPES = "openid email https://www.googleapis.com/auth/calendar.events";
 const TZ = "America/Sao_Paulo";
@@ -9,7 +10,7 @@ export const googleConfigured = () => !!(process.env.GOOGLE_CLIENT_ID && process
 
 /** token de acesso válido do usuário logado (renova com o refresh token quando preciso) */
 export async function googleToken(s: SupabaseClient): Promise<{ token: string; cfg: any } | null> {
-  const { data: cfg } = await s.rpc("google_tokens_get");
+  const cfg = await googleCfg(s);
   if (!cfg || !(cfg as any).refresh_token) return null;
   const c = cfg as any;
   if (c.access_token && c.expires_at && new Date(c.expires_at).getTime() > Date.now() + 60_000) return { token: c.access_token, cfg: c };
