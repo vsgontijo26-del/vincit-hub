@@ -13,7 +13,8 @@ export default function Avisos({ fallback }: { fallback: Aviso[] }) {
   const [live, setLive] = useState(false);
   useEffect(() => {
     createClient().from("notifications").select("*").is("read_at", null).order("created_at", { ascending: false }).limit(12).then(({ data, error }) => {
-      if (error) { setItems(fallback); return; }
+      // sem tabela, ou sem avisos gerados ainda: mostra as pendências calculadas na hora
+      if (error || !data?.length) { setItems(fallback); return; }
       setLive(true);
       setItems((data || []).map((n: any) => ({ id: n.id, title: n.title, href: n.href, action: ACTION[n.source_type] || "Abrir", tone: TONE[n.kind] || "muted" })));
     });

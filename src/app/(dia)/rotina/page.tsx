@@ -119,7 +119,7 @@ export default function Rotina() {
       )}
 
       <section className="card p-5">
-        <p className="font-mono text-[11px] tracking-widest uppercase text-fog mb-4">Rotinas · modelos prontos</p>
+        <p className="font-mono text-[11px] tracking-widest uppercase text-fog mb-4">Rotinas</p>
         <RoutinesPanel wide spaces={d.spaces} statuses={d.statuses} tasks={d.tasks} today={td} onChanged={load} />
       </section>
     </>
