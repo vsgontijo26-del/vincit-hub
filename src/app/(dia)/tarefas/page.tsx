@@ -1,5 +1,7 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { dtShort, today } from "@/lib/agency";
 import PageHead from "@/components/PageHead";
@@ -7,18 +9,42 @@ import { I } from "@/components/icons";
 import { PRIORITIES, STATUS_TYPES, Flag, Recur, recurLabel } from "@/components/tasks/shared";
 import SpaceSettings from "@/components/tasks/SpaceSettings";
 import TaskDrawer from "@/components/tasks/TaskDrawer";
+import WeekView from "@/components/tasks/WeekView";
+import Routines from "@/components/tasks/Routines";
+import ProjectsBoard from "@/components/tasks/ProjectsBoard";
+import ProjectPanel from "@/components/tasks/ProjectPanel";
+import { isProjectsSpace } from "@/components/dia/DiaNav";
+import { syncTask, unsyncTask } from "@/lib/gsync";
 
 const TYPE_COLOR: Record<string, string> = { aberto: "#8a8f94", andamento: "#f5c84c", concluido: "#6eefb6" };
 const ls = { get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} } };
 
 type Group = { key: string; name: string; color: string; type: string; items: any[]; statusId?: string };
 
-export default function Tarefas() {
+export default function Page() {
+  return <Suspense><Tarefas /></Suspense>;
+}
+
+type Sel = { space?: string; list?: string; inbox?: boolean; projeto?: string };
+
+function Tarefas() {
+  const router = useRouter();
+  const qs = useSearchParams();
   const [d, setD] = useState<{ spaces: any[]; statuses: any[]; lists: any[]; tags: any[]; tasks: any[]; team: any[]; projects: any[] }>({ spaces: [], statuses: [], lists: [], tags: [], tasks: [], team: [], projects: [] });
   const [loading, setLoading] = useState(true);
-  const [sel, setSel] = useState<{ space?: string; list?: string; inbox?: boolean }>({});
+  // seleção vem da URL (o menu lateral de Seu dia aponta para ela)
+  const sel: Sel = { space: qs.get("space") || undefined, list: qs.get("list") || undefined, inbox: !!qs.get("inbox"), projeto: qs.get("projeto") || undefined };
+  const boardView = qs.get("view") === "projetos" && !sel.projeto;
+  const setSel = (x: Sel) => {
+    const u = new URLSearchParams();
+    if (x.inbox) u.set("inbox", "1");
+    if (x.space) u.set("space", x.space);
+    if (x.list) u.set("list", x.list);
+    if (x.projeto) u.set("projeto", x.projeto);
+    router.push("/tarefas" + (u.size ? "?" + u : ""));
+  };
   const [draft, setDraft] = useState("");
-  const [view, setView] = useState<"lista" | "quadro">("lista");
+  const [view, setView] = useState<"lista" | "quadro" | "semana">("lista");
   const [q, setQ] = useState("");
   const [who, setWho] = useState("");
   const [tag, setTag] = useState("");
@@ -31,6 +57,7 @@ export default function Tarefas() {
   const [drag, setDrag] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [routines, setRoutines] = useState(false);
   const td = today();
 
   const load = useCallback(async () => {
@@ -47,16 +74,19 @@ export default function Tarefas() {
     if (!sp.error && !(sp.data || []).length) { await s.rpc("ag_my_default_space"); return load(); }
     setD({ spaces: sp.data || [], statuses: st.data || [], lists: li.data || [], tags: tg.data || [], tasks: tk.data || [], team: tm.data || [], projects: pr.data || [] });
     setLoading(false);
+    window.dispatchEvent(new Event("vh:tasks"));
   }, []);
   useEffect(() => {
     load();
-    const v = ls.get("vh.tasks.view"); if (v === "quadro" || v === "lista") setView(v);
-    const sv = ls.get("vh.tasks.sel"); if (sv) try { setSel(JSON.parse(sv)); } catch {}
+    const v = ls.get("vh.tasks.view"); if (v === "quadro" || v === "lista" || v === "semana") setView(v);
   }, [load]);
   useEffect(() => { ls.set("vh.tasks.view", view); }, [view]);
-  useEffect(() => { ls.set("vh.tasks.sel", JSON.stringify(sel)); }, [sel]);
+  useEffect(() => { const v = qs.get("view"); if (v === "quadro" || v === "lista" || v === "semana") setView(v); }, [qs]);
   // seleção apontando para espaço excluído
-  useEffect(() => { if (!loading && sel.space && !sel.inbox && !d.spaces.some((x) => x.id === sel.space)) setSel({}); }, [loading, d.spaces, sel.space]);
+  useEffect(() => { if (!loading && sel.space && !sel.inbox && !d.spaces.some((x) => x.id === sel.space)) setSel({}); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [loading, d.spaces, sel.space]);
+  // "Nova tarefa" vinda do Resumo
+  const novaDone = useRef(false);
+  useEffect(() => { if (!loading && qs.get("nova") && !novaDone.current) { novaDone.current = true; newTask(); } /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [loading]);
   useEffect(() => { if (open) setOpen(d.tasks.find((x) => x.id === open.id) || null); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [d.tasks]);
 
   const space = d.spaces.find((x) => x.id === sel.space);
@@ -72,6 +102,7 @@ export default function Tarefas() {
   const visible = d.tasks.filter((x) => !x.parent_id && !x.inbox
     && (!sel.space || x.space_id === sel.space)
     && (!sel.list || x.list_id === sel.list)
+    && (!sel.projeto || x.project_id === sel.projeto)
     && (!who || x.assignee === who)
     && (!tag || (x.tags || []).includes(tag))
     && (!pri || x.priority === pri)
@@ -89,6 +120,9 @@ export default function Tarefas() {
     if (g.statusId) return g.statusId;
     return stOf(spaceId).find((s) => s.type === g.type)?.id;
   }
+  const project = sel.projeto ? d.projects.find((x) => x.id === sel.projeto) : null;
+  /** espaço onde nasce uma tarefa nova: o selecionado, o de Projetos (projeto aberto) ou o primeiro */
+  const targetSpace = () => sel.space || (sel.projeto ? (d.spaces.find(isProjectsSpace) || d.spaces.find((x) => d.tasks.some((t) => t.project_id === sel.projeto && t.space_id === x.id)) || d.spaces[0])?.id : d.spaces.find((x) => !isProjectsSpace(x))?.id || d.spaces[0]?.id);
   async function moveTo(taskId: string, g: Group) {
     const t = d.tasks.find((x) => x.id === taskId); if (!t) return;
     const status_id = statusFor(t.space_id, g);
@@ -96,17 +130,17 @@ export default function Tarefas() {
     const st = statusById[status_id];
     setD((p) => ({ ...p, tasks: p.tasks.map((x) => (x.id === taskId ? { ...x, status_id, done: st?.type === "concluido" } : x)) }));
     await createClient().from("ag_tasks").update({ status_id }).eq("id", taskId);
-    load();
+    syncTask(taskId); load();
   }
   async function quickAdd(g: Group) {
     const title = (adding[g.key] || "").trim(); if (!title) return;
-    const spaceId = sel.space || d.spaces[0]?.id;
-    await createClient().from("ag_tasks").insert({ title, space_id: spaceId, list_id: sel.list || null, status_id: statusFor(spaceId, g), assignee: who || null, priority: null, tags: tag ? [tag] : [] });
+    const spaceId = targetSpace();
+    await createClient().from("ag_tasks").insert({ title, space_id: spaceId, list_id: sel.list || null, project_id: sel.projeto || null, status_id: statusFor(spaceId, g), assignee: who || null, priority: null, tags: tag ? [tag] : [] });
     setAdding({ ...adding, [g.key]: "" }); load();
   }
   async function toggleDone(t: any) {
     setD((p) => ({ ...p, tasks: p.tasks.map((x) => (x.id === t.id ? { ...x, done: !t.done } : x)) }));
-    await createClient().from("ag_tasks").update({ done: !t.done }).eq("id", t.id); load();
+    await createClient().from("ag_tasks").update({ done: !t.done }).eq("id", t.id); syncTask(t.id); load();
   }
   async function capture(e: React.FormEvent) {
     e.preventDefault(); const title = draft.trim(); if (!title) return;
@@ -119,11 +153,12 @@ export default function Tarefas() {
   }
   async function discard(t: any) {
     setD((p) => ({ ...p, tasks: p.tasks.filter((x) => x.id !== t.id) }));
+    unsyncTask(t.id);
     await createClient().from("ag_tasks").delete().eq("id", t.id); load();
   }
   async function newTask() {
-    const spaceId = sel.space || d.spaces[0]?.id; if (!spaceId) return;
-    const { data } = await createClient().from("ag_tasks").insert({ title: "Nova tarefa", space_id: spaceId, list_id: sel.list || null, status_id: stOf(spaceId)[0]?.id, priority: null }).select().single();
+    const spaceId = targetSpace(); if (!spaceId) return;
+    const { data } = await createClient().from("ag_tasks").insert({ title: "Nova tarefa", space_id: spaceId, list_id: sel.list || null, project_id: sel.projeto || null, status_id: stOf(spaceId)[0]?.id, priority: null }).select().single();
     await load(); if (data) setOpen(data);
   }
 
@@ -144,8 +179,11 @@ export default function Tarefas() {
         <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round"><path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 2h6l1-2h5" /></svg>
         <span className="flex-1 text-left">Inbox</span><span className="text-xs text-fog">{d.tasks.filter((x) => x.inbox && !x.done).length}</span>
       </button>
+      <button onClick={() => { router.push("/tarefas?view=projetos"); setNavOpen(false); }} className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg ${boardView || sel.projeto ? "bg-mint/10 text-mint" : "hover:bg-panel2"}`}>
+        <span className="w-2 h-2 rounded-full bg-[#7aa7ff] mx-1" /><span className="flex-1 text-left">Projetos</span><span className="text-xs text-fog">{d.projects.filter((p) => p.stage !== "entregue").length}</span>
+      </button>
       <p className="label !mt-4 !mb-1 px-2.5">Espaços</p>
-      {d.spaces.map((s) => {
+      {d.spaces.filter((s) => !isProjectsSpace(s)).map((s) => {
         const active = sel.space === s.id;
         return (
           <div key={s.id}>
@@ -167,13 +205,24 @@ export default function Tarefas() {
     </nav>
   );
 
-  const crumb = sel.inbox ? "Inbox" : space ? `${space.name}${sel.list ? " / " + (d.lists.find((l) => l.id === sel.list)?.name || "") : ""}` : "Todas as tarefas";
+  const crumb = sel.inbox ? "Inbox" : boardView ? "Projetos por etapa" : project ? "Tarefas do projeto" : space ? `${space.name}${sel.list ? " / " + (d.lists.find((l) => l.id === sel.list)?.name || "") : ""}` : "Todas as tarefas";
+
+  const goView = (v: "lista" | "quadro" | "semana") => { setView(v); if (boardView) router.push("/tarefas"); };
+  const viewTabs = (
+    <div className="flex flex-wrap bg-panel2 rounded-lg p-0.5 w-fit">
+      {(["lista", "quadro", "semana"] as const).map((v) => <button key={v} onClick={() => goView(v)} className={`px-3 py-1 text-sm rounded-md ${view === v && !boardView ? "bg-ink text-mint" : "text-fog"}`}>{v === "lista" ? "Lista" : v === "quadro" ? "Quadro" : "Semana"}</button>)}
+      <Link href="/agenda" className="px-3 py-1 text-sm rounded-md text-fog hover:text-paper">Calendário</Link>
+      <button onClick={() => router.push("/tarefas?view=projetos")} className={`px-3 py-1 text-sm rounded-md ${boardView ? "bg-ink text-mint" : "text-fog"}`}>Projetos</button>
+    </div>
+  );
 
   return (
     <>
-      <PageHead kicker="GESTOR · 01 OPERAÇÃO" title="Tarefas" desc="Espaços, etapas e tags do seu jeito — no estilo ClickUp." />
-      <div className="grid lg:grid-cols-[230px_1fr] gap-5">
-        <aside className="hidden lg:block card p-2 self-start sticky top-4">{sidebar}</aside>
+      {project
+        ? <PageHead kicker="SEU DIA · TAREFAS · PROJETOS" title={project.title} desc="As tarefas são a lista do projeto; os dados de entrega ficam no painel acima delas." />
+        : <PageHead kicker="SEU DIA · TAREFAS" title={boardView ? "Projetos" : "Tarefas"} desc={boardView ? "Todos os projetos em colunas por etapa. Abra um projeto para ver o painel e as tarefas dele." : "Todas as demandas em um lugar: espaços, projetos, etapas, tags e rotinas."} />}
+      {project && <ProjectPanel id={project.id} onChanged={load} />}
+      <div>
 
         <section className="min-w-0">
           {/* barra superior */}
@@ -182,7 +231,8 @@ export default function Tarefas() {
             {space && <span className="w-3 h-3 rounded-sm" style={{ background: space.color }} />}
             <h2 className="font-display font-bold text-lg mr-auto truncate">{crumb}</h2>
             {space && <button onClick={() => setCfg({ open: true, space })} className="btn btn-ghost btn-sm">⚙ Etapas, listas e tags</button>}
-            {!sel.inbox && <button onClick={newTask} className="btn btn-mint btn-sm"><I.plus className="w-4 h-4" /> Tarefa</button>}
+            <button onClick={() => setRoutines(true)} className="btn btn-ghost btn-sm"><Recur className="w-3.5 h-3.5" /> Rotinas</button>
+            {!sel.inbox && !boardView && <button onClick={newTask} className="btn btn-mint btn-sm"><I.plus className="w-4 h-4" /> Tarefa</button>}
           </div>
           {navOpen && <div className="lg:hidden card p-2 mb-3">{sidebar}</div>}
 
@@ -206,11 +256,12 @@ export default function Tarefas() {
                 {!d.tasks.some((x) => x.inbox && !x.done) && <p className="text-fog text-sm text-center py-10">Inbox vazio. Jogue aqui qualquer ideia solta.</p>}
               </ul>
             </div>
-          ) : (<>
+          ) : boardView ? (<>
+            <div className="mb-4 pb-3 border-b border-line">{viewTabs}</div>
+            <ProjectsBoard onChanged={load} />
+          </>) : (<>
           <div className="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-line">
-            <div className="flex bg-panel2 rounded-lg p-0.5">
-              {(["lista", "quadro"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1 text-sm rounded-md capitalize ${view === v ? "bg-ink text-mint" : "text-fog"}`}>{v === "lista" ? "☰ Lista" : "▦ Quadro"}</button>)}
-            </div>
+            {viewTabs}
             <input className="input !py-1.5 !w-44" placeholder="Buscar…" value={q} onChange={(e) => setQ(e.target.value)} />
             <select className="input !py-1.5 !w-auto" value={who} onChange={(e) => setWho(e.target.value)}><option value="">Responsável</option>{d.team.map((m) => <option key={m.id}>{m.name}</option>)}</select>
             <select className="input !py-1.5 !w-auto" value={tag} onChange={(e) => setTag(e.target.value)}><option value="">Tag</option>{d.tags.filter((g) => !space || !g.space_id || g.space_id === space.id).map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}</select>
@@ -218,7 +269,9 @@ export default function Tarefas() {
             <label className="flex items-center gap-1.5 text-sm text-fog ml-auto cursor-pointer"><input type="checkbox" className="accent-[var(--color-mint)]" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> Concluídas{hiddenDone ? ` (${hiddenDone})` : ""}</label>
           </div>
 
-          {loading ? <p className="text-fog text-sm py-10 text-center">Carregando…</p> : view === "lista" ? (
+          {loading ? <p className="text-fog text-sm py-10 text-center">Carregando…</p> : view === "semana" ? (
+            <WeekView tasks={visible} statusById={statusById} spaces={d.spaces} today={td} showDone={showDone} onOpen={setOpen} onToggle={toggleDone} onChanged={load} />
+          ) : view === "lista" ? (
             <div className="space-y-5">
               {shown.map((g) => (
                 <div key={g.key} onDragOver={(e) => { e.preventDefault(); setOver(g.key); }} onDragLeave={() => setOver(null)} onDrop={() => { if (drag) moveTo(drag, g); setDrag(null); setOver(null); }} className={`rounded-xl ${over === g.key ? "ring-1 ring-mint/50" : ""}`}>
@@ -296,6 +349,7 @@ export default function Tarefas() {
           statuses={d.statuses} lists={d.lists} tags={d.tags} tasks={d.tasks}
           onChanged={(id) => { load(); if (id) setSel({ space: id }); }} />
       )}
+      <Routines open={routines} onClose={() => setRoutines(false)} spaces={d.spaces} statuses={d.statuses} tasks={d.tasks} today={td} onChanged={load} />
       <TaskDrawer task={open} onClose={() => setOpen(null)} onChanged={load} spaces={d.spaces} statuses={d.statuses} lists={d.lists} tags={d.tags} team={d.team} projects={d.projects} tasks={d.tasks} onOpen={setOpen} />
     </>
   );

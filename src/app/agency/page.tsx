@@ -126,13 +126,13 @@ export default async function AgencyHome() {
 
       <div className="grid lg:grid-cols-3 gap-5">
         <section className="card p-5 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4"><h2 className="font-display font-bold text-lg">Projetos em andamento</h2><Link href="/agency/projetos" className="text-xs text-fog hover:text-mint">Ver quadro</Link></div>
-          {!ativos.length ? <p className="text-fog text-sm py-6 text-center">Nenhum projeto ativo. <Link href="/agency/projetos" className="text-mint underline">Criar projeto</Link></p> : (
+          <div className="flex items-center justify-between mb-4"><h2 className="font-display font-bold text-lg">Projetos em andamento</h2><Link href="/tarefas?view=projetos" className="text-xs text-fog hover:text-mint">Ver quadro</Link></div>
+          {!ativos.length ? <p className="text-fog text-sm py-6 text-center">Nenhum projeto ativo. <Link href="/tarefas?view=projetos" className="text-mint underline">Criar projeto</Link></p> : (
             <ul className="divide-y divide-line">
               {ativos.slice(0, 7).map((p: any) => {
                 const late = p.due_date && p.due_date < today;
                 return (
-                  <li key={p.id}><Link href={`/agency/projetos/${p.id}`} className="py-3 flex items-center gap-3 hover:text-mint">
+                  <li key={p.id}><Link href={`/projetos/${p.id}`} className="py-3 flex items-center gap-3 hover:text-mint">
                     <span className={`w-2 h-2 rounded-full shrink-0 ${late ? "bg-danger" : "bg-mint"}`} />
                     <div className="flex-1 min-w-0"><p className="text-sm truncate">{p.title}</p><p className="text-xs text-fog">{p.ag_clients?.name || "Sem cliente"}</p></div>
                     <span className="chip">{stageLabel(p.stage)}</span>
@@ -144,7 +144,7 @@ export default async function AgencyHome() {
           )}
         </section>
         <section className="card p-5">
-          <div className="flex items-center justify-between mb-4"><h2 className="font-display font-bold text-lg">Próximos 14 dias</h2><Link href="/agency/agenda" className="text-xs text-fog hover:text-mint">Agenda</Link></div>
+          <div className="flex items-center justify-between mb-4"><h2 className="font-display font-bold text-lg">Próximos 14 dias</h2><Link href="/agenda" className="text-xs text-fog hover:text-mint">Agenda</Link></div>
           {!events?.length ? <p className="text-fog text-sm">Nada agendado.</p> : (
             <ul className="space-y-2">
               {events.map((e) => { const k = EVENT_KINDS.find((x) => x.k === e.kind); return (
