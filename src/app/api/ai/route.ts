@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG } from "@/lib/ai";
+import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG, withAIQueue } from "@/lib/ai";
 import { AGENTS } from "@/lib/agents";
 import { FORMATS, CATS, MIDIAS, FORMAT_MIDIA, formatBrief } from "@/lib/formats";
 import { EXAMPLES } from "@/lib/formats-examples";
@@ -14,9 +14,11 @@ function postsTable(posts: any[]) {
   ).join("\n");
 }
 
-export async function POST(req: Request) {
+export const POST = withAIQueue("ai", handle);
+
+async function handle(body: any) {
   try {
-    const { task, data } = await req.json();
+    const { task, data } = body;
     if (await aiQuotaExceeded(await createClient())) return NextResponse.json({ error: QUOTA_MSG }, { status: 429 });
     const ctx = data?.account ? `Perfil: @${data.account.username}${data.account.niche ? ` | Nicho: ${data.account.niche}` : ""}${data.account.goals ? ` | Objetivos: ${data.account.goals}` : ""}${data.account.followers_count ? ` | Seguidores: ${data.account.followers_count}` : ""}${data.account.brand_voice ? `\nVoz da marca: ${data.account.brand_voice}` : ""}${data.account.briefing ? `\n${briefingText(data.account.briefing)}` : ""}` : "";
 

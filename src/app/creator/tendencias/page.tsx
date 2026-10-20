@@ -38,7 +38,7 @@ export default function Tendencias() {
         <div><label className="label">Nicho / tema</label><input required className="input" value={f.niche} onChange={(e) => setF({ ...f, niche: e.target.value })} placeholder="produção audiovisual para marcas" /></div>
         <div><label className="label">Público</label><input className="input" value={f.audience} onChange={(e) => setF({ ...f, audience: e.target.value })} placeholder="donos de pequenas empresas" /></div>
         <div><label className="label">Foco</label><input className="input" value={f.focus} onChange={(e) => setF({ ...f, focus: e.target.value })} /></div>
-        <div className="md:col-span-4 flex justify-end"><button disabled={ai.busy} className="btn btn-mint"><I.trend className="w-4 h-4" />{ai.busy ? "Pesquisando na web… (até 1 min)" : "Buscar tendências"}</button></div>
+        <div className="md:col-span-4 flex justify-end"><button disabled={ai.busy} className="btn btn-mint"><I.trend className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Pesquisando na web… (até 1 min)" : "Buscar tendências"}</button></div>
       </form>
       {ai.error && <div className="card px-4 py-3 mb-5 text-sm text-danger border-danger/40">{ai.error}</div>}
 

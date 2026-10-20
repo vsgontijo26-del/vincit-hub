@@ -93,7 +93,7 @@ export default function QuickRules() {
             )}
             <div className="md:col-span-2 bg-panel2 rounded-xl p-4 flex flex-col md:flex-row gap-3 md:items-end">
               <div className="flex-1"><label className="label">O que a pessoa recebe? (para a IA escrever as mensagens)</label><input className="input" value={form.offer} onChange={(e) => setForm({ ...form, offer: e.target.value })} placeholder="Ex.: checklist gratuito de roteiro para Reels" /></div>
-              <button type="button" onClick={suggest} disabled={ai.busy} className="btn btn-ghost"><I.spark className="w-4 h-4" />{ai.busy ? "Escrevendo…" : "Escrever com IA"}</button>
+              <button type="button" onClick={suggest} disabled={ai.busy} className="btn btn-ghost"><I.spark className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Escrevendo…" : "Escrever com IA"}</button>
             </div>
             {ai.error && <p className="md:col-span-2 text-danger text-sm">{ai.error}</p>}
             {form.trigger_type === "comment" && <div className="md:col-span-2"><label className="label">Resposta pública no comentário</label><input className="input" value={form.public_reply} onChange={(e) => setForm({ ...form, public_reply: e.target.value })} placeholder="Te mandei no direct! 📩" /></div>}

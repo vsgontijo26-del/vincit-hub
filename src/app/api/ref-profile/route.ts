@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { igToken } from "@/lib/tokens";
-import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG } from "@/lib/ai";
+import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG, withAIQueue } from "@/lib/ai";
 import { gget } from "@/lib/meta";
 import { briefingText } from "@/lib/briefing";
 import { FORMATS } from "@/lib/formats";
@@ -66,9 +66,11 @@ async function youtube(handle: string): Promise<Snap | null> {
   };
 }
 
-export async function POST(req: Request) {
+export const POST = withAIQueue("ref-profile", handle);
+
+async function handle(body: any) {
   try {
-    const { url, account_id, paste } = await req.json();
+    const { url, account_id, paste } = body;
     const p = parse(url || "");
     if (!p) throw new Error("Link não reconhecido. Use um perfil do Instagram (instagram.com/usuario) ou canal do YouTube (youtube.com/@canal).");
     const supabase = await createClient();

@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG } from "@/lib/ai";
+import { callClaude, extractJson, aiQuotaExceeded, QUOTA_MSG, withAIQueue } from "@/lib/ai";
 import { briefingText } from "@/lib/briefing";
 import { AXES, computeInputs, availability } from "@/lib/diagnostico";
 
 export const maxDuration = 300;
 
 /** Raio-X do perfil: lê os dados no servidor (RLS do usuário), calcula a evidência e pede à IA nota, leitura e recomendações por eixo */
-export async function POST(req: Request) {
+export const POST = withAIQueue("diagnostico", handle);
+
+async function handle(body: any) {
   try {
-    const { account_id } = await req.json();
+    const { account_id } = body;
     const sb = await createClient();
     if (await aiQuotaExceeded(sb)) return NextResponse.json({ error: QUOTA_MSG }, { status: 429 });
     const { data: account } = await sb.from("ig_accounts").select("*").eq("id", account_id).maybeSingle();
