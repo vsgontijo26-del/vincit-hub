@@ -150,7 +150,7 @@ export default function Proposta() {
           <section className="card p-5 space-y-4">
             <div className="flex flex-col md:flex-row gap-3 md:items-end bg-panel2 rounded-xl p-4">
               <div className="flex-1"><label className="label">Contexto para a IA (opcional)</label><input className="input" value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="Ex.: vídeo de 2 min para lançamento, tom sofisticado, entrega em 20 dias" /></div>
-              <button onClick={writeAI} disabled={ai.busy} className="btn btn-ghost"><I.spark className="w-4 h-4" />{ai.busy ? "Escrevendo…" : "Escrever textos com IA"}</button>
+              <button onClick={writeAI} disabled={ai.busy} className="btn btn-ghost"><I.spark className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Escrevendo…" : "Escrever textos com IA"}</button>
             </div>
             {ai.error && <p className="text-danger text-sm">{ai.error}</p>}
             {ta("intro", "Apresentação", "Uma abertura pessoal para o cliente…", 3)}

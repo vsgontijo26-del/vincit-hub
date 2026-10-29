@@ -91,7 +91,7 @@ export default function Perfil() {
         </div>
         <div className="flex gap-2 flex-wrap">
           {acc.connected && <button onClick={sync} disabled={syncing} className="btn btn-ghost"><I.refresh className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />{syncing ? "Sincronizando…" : "Sincronizar"}</button>}
-          <button onClick={diagnose} disabled={ai.busy} className="btn btn-mint"><I.spark className="w-4 h-4" />{ai.busy ? "Analisando…" : "Diagnóstico com IA"}</button>
+          <button onClick={diagnose} disabled={ai.busy} className="btn btn-mint"><I.spark className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Analisando…" : "Diagnóstico com IA"}</button>
         </div>
       </div>
       {msg && <div className="card px-4 py-3 mb-5 text-sm text-mint border-mint-dim">{msg}</div>}
@@ -142,7 +142,7 @@ export default function Perfil() {
           <div className="grid md:grid-cols-2 gap-4">
             <div><label className="label">Como a marca escreve (a IA segue isso em tudo)</label><textarea className="input min-h-[150px]" value={acc.brand_voice || ""} onChange={(e) => setAcc({ ...acc, brand_voice: e.target.value })} placeholder="Ex.: tom próximo e confiante, frases curtas, fala 'a gente', sem emojis, nunca usa 'top' ou 'incrível'…" /></div>
             <div><label className="label">Ou gere a partir de 3 textos seus</label><textarea className="input min-h-[150px]" value={samples} onChange={(e) => setSamples(e.target.value)} placeholder="Cole 3 legendas ou roteiros que tenham a cara da marca." />
-              <button type="button" disabled={ai.busy || samples.length < 80} onClick={genVoice} className="btn btn-ghost btn-sm mt-2"><I.spark className="w-3.5 h-3.5" />{ai.busy ? "Lendo…" : "Extrair voz da marca"}</button></div>
+              <button type="button" disabled={ai.busy || samples.length < 80} onClick={genVoice} className="btn btn-ghost btn-sm mt-2"><I.spark className="w-3.5 h-3.5" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Lendo…" : "Extrair voz da marca"}</button></div>
           </div>
         ) : <p className="text-sm whitespace-pre-wrap">{acc.brand_voice || <span className="text-fog">Ainda não definida. Com ela, legendas, roteiros e respostas saem com o jeito da marca.</span>}</p>}
       </section>

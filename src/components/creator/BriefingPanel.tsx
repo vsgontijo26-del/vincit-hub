@@ -105,7 +105,7 @@ export default function BriefingPanel() {
           <p className="font-display font-bold">Preencher a partir de um texto</p>
           <p className="text-xs text-fog mb-3">Cole a bio, texto do site, apresentação comercial, anotações de reunião… A IA preenche só os campos que estão vazios; revise depois.</p>
           <textarea className="input min-h-[140px]" value={dump} onChange={(e) => setDump(e.target.value)} placeholder="Cole aqui qualquer material sobre o negócio e o público." />
-          <div className="flex justify-end gap-2 mt-3">{ai.error && <p className="text-danger text-sm mr-auto">{ai.error}</p>}<button disabled={ai.busy || dump.length < 40} onClick={fillAI} className="btn btn-mint btn-sm">{ai.busy ? "Lendo…" : "Preencher campos vazios"}</button></div>
+          <div className="flex justify-end gap-2 mt-3">{ai.error && <p className="text-danger text-sm mr-auto">{ai.error}</p>}<button disabled={ai.busy || dump.length < 40} onClick={fillAI} className="btn btn-mint btn-sm">{ai.queued ? "Na fila do Claude…" : ai.busy ? "Lendo…" : "Preencher campos vazios"}</button></div>
         </div>
       )}
 

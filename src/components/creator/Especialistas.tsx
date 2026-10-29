@@ -45,7 +45,7 @@ export default function Especialistas() {
           <div><p className="font-display font-bold text-xl">{ag.name}{ag.web && <span className="chip chip-mint ml-2 align-middle">pesquisa na web</span>}</p><p className="text-fog text-sm">{ag.role}</p></div>
           <div><label className="label">Perfil</label><AccountSelect accounts={accounts} value={accountId} onChange={setAccountId} /></div>
           <div><label className="label">Contexto</label><textarea required className="input min-h-[160px]" value={input} onChange={(e) => setInput(e.target.value)} placeholder={ag.placeholder} /></div>
-          <button disabled={ai.busy} className="btn btn-mint w-full"><I.spark className="w-4 h-4" />{ai.busy ? "Trabalhando…" : `Acionar ${ag.name}`}</button>
+          <button disabled={ai.busy} className="btn btn-mint w-full"><I.spark className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Trabalhando…" : `Acionar ${ag.name}`}</button>
           {ai.error && <p className="text-danger text-sm">{ai.error}</p>}
         </form>
         <section className="lg:col-span-3 card p-6 min-h-[420px]">

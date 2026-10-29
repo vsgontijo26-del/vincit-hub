@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { aiFetch } from "@/lib/useAI";
 import { useAccounts, fmt } from "@/lib/useAccounts";
 import { AXES, axisLabel } from "@/lib/diagnostico";
 import PageHead from "@/components/PageHead";
@@ -47,9 +48,8 @@ export default function Diagnostico() {
   async function run() {
     setBusy(true); setErr(null); setMsg(null);
     try {
-      const r = await fetch("/api/ai/diagnostico", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ account_id: accId }) });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Erro");
+      const j = await aiFetch("/api/ai/diagnostico", { account_id: accId }, () => setMsg("Pedido na fila do Claude. Pode sair da página: o Raio-X fica salvo aqui quando ficar pronto."));
+      setMsg(null);
       const row = { id: j.id, created_at: j.created_at, result: j.result, inputs: j.inputs, account_id: accId };
       if (j.saved) await load(); else { setList([row, ...list]); setNoTable(true); setCur(row); setSel([]); }
     } catch (e: any) { setErr(e.message); }

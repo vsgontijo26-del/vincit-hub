@@ -72,7 +72,7 @@ export default function Referencias() {
         <p className="md:col-span-3 -mt-2 text-xs text-fog">Com views + mediana (ou seguidores) calculamos o múltiplo de outlier: acima de 3x é sinal de formato que escala, não sorte.</p>
         <div className="md:col-span-3"><label className="label">Conteúdo: legenda, texto dos slides ou transcrição da fala</label><textarea required className="input min-h-[140px]" value={f.content} onChange={(e) => setF({ ...f, content: e.target.value })} placeholder="Cole aqui o texto. Quanto mais completo (fala + texto na tela + legenda), melhor a análise." /></div>
         {ai.error && <p className="md:col-span-3 text-danger text-sm">{ai.error}</p>}
-        <div className="md:col-span-3 flex justify-end"><button disabled={ai.busy} className="btn btn-mint"><I.spark className="w-4 h-4" />{ai.busy ? "Analisando…" : "Analisar e salvar"}</button></div>
+        <div className="md:col-span-3 flex justify-end"><button disabled={ai.busy} className="btn btn-mint"><I.spark className="w-4 h-4" />{ai.queued ? "Na fila do Claude…" : ai.busy ? "Analisando…" : "Analisar e salvar"}</button></div>
       </form>
 
       <div className="flex items-center justify-between gap-3 mb-4"><h2 className="font-display font-bold text-lg">Biblioteca <span className="text-fog font-normal text-sm">({list.length})</span></h2><input className="input max-w-xs" placeholder="Buscar…" value={q} onChange={(e) => setQ(e.target.value)} /></div>

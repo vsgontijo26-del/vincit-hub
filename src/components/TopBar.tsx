@@ -7,6 +7,7 @@ import { A } from "./agency/icons";
 import { useAccess } from "@/lib/useAccess";
 import { hubAllowed } from "@/lib/access";
 import Bell from "./dia/Bell";
+import ClaudeQueue from "./ClaudeQueue";
 
 /* rotas de Seu dia (a aba "/" fica ativa em todas) */
 const DIA = ["/tarefas", "/agenda", "/rotina", "/projetos"];
@@ -42,6 +43,7 @@ export default function TopBar() {
         </Link>
         <div className="hidden md:block">{nav}</div>
         <form action="/auth/signout" method="post" className="ml-auto flex items-center gap-2">
+          <ClaudeQueue />
           <Bell />
           {acc?.role === "superadmin" && <Link href="/admin" className="btn btn-ghost btn-sm text-mint">Admin</Link>}
           <Link href="/conta" className="btn btn-ghost btn-sm"><I.user className="w-3.5 h-3.5" /><span className="hidden sm:inline">Minha conta</span></Link>
